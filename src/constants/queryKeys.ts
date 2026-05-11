@@ -1,0 +1,17 @@
+export const QUERY_KEYS = {
+  IMAGES: 'images',
+  IMAGES_BY_CATEGORY: 'imagesByCategory',
+  CONTACT_SUBMISSIONS: 'contactSubmissions',
+  NEWSLETTER_SUBSCRIBERS: 'newsletterSubscribers',
+  ADMIN_CHECK: 'adminCheck',
+  AUTH_SESSION: 'authSession',
+  SITE_CONTENT: 'siteContent',
+  STATS: 'stats',
+  CERTIFICATIONS: 'certifications',
+  TESTIMONIALS: 'testimonials',
+  CASE_STUDIES: 'caseStudies',
+  BLOG_ARTICLES: 'blogArticles',
+  CULTURE_HIGHLIGHTS: 'cultureHighlights',
+  SERVICE_CATEGORIES: 'serviceCategories',
+  SERVICES: 'services',
+} as const;
