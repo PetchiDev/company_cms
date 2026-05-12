@@ -25,16 +25,24 @@ import type { ServiceCategoryGroup, ServiceItem, ServiceCategory } from '@/types
 
 /* ─── 1. SITE CONTENT HOOK ─── */
 export const useSiteContent = () => {
-  const { data: content = [], isLoading } = useQuery({
+  const { data: content = [], isLoading: isLoadingContent } = useQuery({
     queryKey: [QUERY_KEYS.SITE_CONTENT],
     queryFn: siteContentService.fetchAll,
   });
 
+  const { data: dbLogos = [], isLoading: isLoadingLogo } = useQuery({
+    queryKey: [QUERY_KEYS.IMAGES, IMAGE_CATEGORIES.LOGO],
+    queryFn: () => mediaService.fetchByCategory(IMAGE_CATEGORIES.LOGO),
+  });
+
+  const isLoading = isLoadingContent || isLoadingLogo;
   const contentMap = new Map(content.map((item) => [item.key, item.value]));
 
   const getText = (key: string, fallback: string): string => {
     return contentMap.get(key) || fallback;
   };
+
+  const logo = dbLogos.length > 0 ? dbLogos[0].url : '';
 
   /* Unified Company Data Object matching COMPANY constant */
   const company = {
@@ -45,7 +53,7 @@ export const useSiteContent = () => {
     motto: getText('company_motto', ''),
     vision: getText('company_vision', ''),
     mission: getText('company_mission', ''),
-    logo: '', 
+    logo: logo, 
     copyright: `© ${new Date().getFullYear()} ${getText('company_name', 'Kryptos')}`,
   };
 
@@ -73,7 +81,7 @@ export const useSiteContent = () => {
 
   const jobPortalUrl = getText('job_portal_url', '#');
 
-  return { company, contactInfo, socialLinks, jobPortalUrl, isLoading, getText };
+  return { company, contactInfo, socialLinks, jobPortalUrl, isLoading, getText, logo };
 };
 
 /* ─── 2. STATS HOOK ─── */
@@ -261,12 +269,6 @@ export const useClientLogos = () => {
 
 /* ─── 10. SITE LOGO HOOK ─── */
 export const useSiteLogo = () => {
-  const { data: dbLogos = [], isLoading } = useQuery({
-    queryKey: [QUERY_KEYS.IMAGES, IMAGE_CATEGORIES.LOGO],
-    queryFn: () => mediaService.fetchByCategory(IMAGE_CATEGORIES.LOGO),
-  });
-
-  const logo = dbLogos.length > 0 ? dbLogos[0].url : '';
-
+  const { logo, isLoading } = useSiteContent();
   return { logo, isLoading };
 };

@@ -302,6 +302,116 @@
   padding-left: 1rem;
 }
 
+/* ─── Profile Dropdown — Premium Glass ─── */
+.navbar__profile-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.navbar__profile-trigger {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dark-navy);
+  background: rgba(0, 0, 0, 0.04);
+  border: 1.5px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.navbar__profile-trigger:hover,
+.navbar__profile-trigger--active {
+  background: rgba(238, 79, 41, 0.08);
+  border-color: rgba(238, 79, 41, 0.2);
+  color: var(--primary-orange);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(238, 79, 41, 0.1);
+}
+
+.navbar__profile-dropdown {
+  position: absolute;
+  top: calc(100% + 15px);
+  right: 0;
+  width: 280px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(238, 79, 41, 0.12);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Tooltip arrow */
+.navbar__profile-dropdown::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  right: 15px;
+  border-width: 8px;
+  border-style: solid;
+  border-color: transparent transparent rgba(255, 255, 255, 0.98) transparent;
+}
+
+.profile-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  transition: all 0.25s ease;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.profile-dropdown__item:hover {
+  background: rgba(238, 79, 41, 0.05);
+  transform: translateX(5px);
+}
+
+.profile-dropdown__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-dropdown__icon--admin {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.profile-dropdown__icon--employee {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.profile-dropdown__text p {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--dark-navy);
+  margin-bottom: 0.1rem;
+}
+
+.profile-dropdown__text span {
+  font-size: 0.75rem;
+  color: var(--muted-text);
+  font-weight: 500;
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 1024px) {
   .navbar__cta-btn span {

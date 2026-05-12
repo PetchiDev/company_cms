@@ -1,6 +1,18 @@
 import { supabase } from '@/lib/supabase';
 import { SUPABASE_TABLES, SUPABASE_BUCKETS } from '@/constants/appConstants';
+import { QUERY_KEYS } from '@/constants/queryKeys';
 import type { ImageRecord, ImageCategory, ImageUploadPayload } from '@/types/image.types';
+
+// Browser-native cross-tab broadcast synchronization trigger
+const broadcastInvalidation = (queryKey: string) => {
+  try {
+    const channel = new BroadcastChannel('kryptos-cms-realtime-sync');
+    channel.postMessage({ type: 'invalidate', queryKey });
+    channel.close();
+  } catch (e) {
+    // Fail silently in non-browser environments
+  }
+};
 
 export const imageService = {
   /** Fetch all images */
@@ -94,6 +106,9 @@ export const imageService = {
       .single();
 
     if (dbError) throw dbError;
+    
+    broadcastInvalidation(QUERY_KEYS.IMAGES);
+    
     return data;
   },
 
@@ -114,6 +129,7 @@ export const imageService = {
       .eq('id', image.id);
 
     if (error) throw error;
+    broadcastInvalidation(QUERY_KEYS.IMAGES);
   },
 
   /** Toggle image active status */
@@ -124,6 +140,7 @@ export const imageService = {
       .eq('id', id);
 
     if (error) throw error;
+    broadcastInvalidation(QUERY_KEYS.IMAGES);
   },
 
   /** Update image sort order */

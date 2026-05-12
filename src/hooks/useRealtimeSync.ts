@@ -30,6 +30,7 @@ export const useRealtimeSync = () => {
       [SUPABASE_TABLES.CULTURE_HIGHLIGHTS]: QUERY_KEYS.CULTURE_HIGHLIGHTS,
       [SUPABASE_TABLES.SERVICE_CATEGORIES]: QUERY_KEYS.SERVICE_CATEGORIES,
       [SUPABASE_TABLES.SERVICES]: QUERY_KEYS.SERVICES,
+      [SUPABASE_TABLES.IMAGES]: QUERY_KEYS.IMAGES,
     };
 
     const channels = Object.entries(tableToQueryKeyMap).map(([tableName, queryKey]) => {

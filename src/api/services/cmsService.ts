@@ -336,7 +336,8 @@ export const mediaService = {
       .from(SUPABASE_TABLES.IMAGES)
       .select('*')
       .eq('category', category)
-      .order('sort_order', { ascending: true });
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
     if (error) throw error;
     return data || [];
   },

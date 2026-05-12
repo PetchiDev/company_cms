@@ -66,7 +66,7 @@ const Footer = () => {
         <div className="container">
           <div className="footer__grid">
             <div className="footer__col">
-              <img src={logo} alt={company.name} className="footer__logo" loading="lazy" />
+              <img src={logo || undefined} alt={company.name} className="footer__logo" loading="lazy" />
               <p className="footer__tagline">{company.motto}</p>
               <div className="footer__social">
                 {Object.entries(socialLinks).map(([name, url]) => (

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChevronDown, Phone } from 'lucide-react';
+import { Menu, X, ChevronDown, Phone, User, Shield, Briefcase } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useSiteContent, useServices, useSiteLogo } from '@/hooks/useCMS';
@@ -15,13 +15,25 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const isMobile = useMediaQuery('DESKTOP');
   const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    
+    const handleClickOutside = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest('.navbar__profile-container')) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   /* Close mobile menu on route change */
@@ -49,7 +61,7 @@ const Navbar = () => {
         {/* Logo */}
         <Link to={ROUTES.HOME} className="navbar__logo" aria-label="Kryptos InfoSys Home">
           <img
-            src={logo}
+            src={logo || undefined}
             alt={company.name}
             className="navbar__logo-img"
             loading="eager"
@@ -129,6 +141,52 @@ const Navbar = () => {
             <Phone size={16} />
             Contact Us
           </Link>
+
+          <div className="navbar__profile-container">
+            <button 
+              className={`navbar__profile-trigger ${isProfileOpen ? 'navbar__profile-trigger--active' : ''}`}
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              aria-label="User account"
+            >
+              <User size={20} />
+            </button>
+            <AnimatePresence>
+              {isProfileOpen && (
+                <motion.div 
+                  className="navbar__profile-dropdown"
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <button 
+                    onClick={() => window.location.href = window.location.origin + '/login'} 
+                    className="profile-dropdown__item"
+                  >
+                    <div className="profile-dropdown__icon profile-dropdown__icon--admin">
+                      <Shield size={16} />
+                    </div>
+                    <div className="profile-dropdown__text">
+                      <p>Login as Admin</p>
+                      <span>Manage site content</span>
+                    </div>
+                  </button>
+                  <button 
+                    onClick={() => window.location.href = 'https://hitayu.live/en/login'} 
+                    className="profile-dropdown__item"
+                  >
+                    <div className="profile-dropdown__icon profile-dropdown__icon--employee">
+                      <Briefcase size={16} />
+                    </div>
+                    <div className="profile-dropdown__text">
+                      <p>Login as Employee</p>
+                      <span>Employee portal</span>
+                    </div>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           {isMobile && (
             <button
