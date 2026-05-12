@@ -90,7 +90,7 @@ const SiteContentManager = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading && (!content || content.length === 0)) {
     return (
       <div className="flex-center" style={{ height: '50vh' }}>
         <Loader2 className="spin" size={32} />

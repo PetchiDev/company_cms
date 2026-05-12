@@ -87,7 +87,7 @@ const CertificationManager = () => {
     });
   };
 
-  if (isLoading) {
+  if (isLoading && certs.length === 0) {
     return (
       <div className="flex-center" style={{ height: '50vh' }}>
         <Loader2 className="spin" size={32} />
@@ -123,7 +123,7 @@ const CertificationManager = () => {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div style={{ height: '60px', width: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img src={cert.url} alt={cert.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+                  <img src={cert.url || undefined} alt={cert.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
                 </div>
                 <span style={{ fontSize: '0.75rem', background: 'var(--bg-light)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)', color: 'var(--muted-text)' }}>
                   Order: {cert.sort_order}

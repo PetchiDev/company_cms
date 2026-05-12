@@ -94,7 +94,7 @@ const StatsManager = () => {
     });
   };
 
-  if (isLoading) {
+  if (isLoading && stats.length === 0) {
     return (
       <div className="flex-center" style={{ height: '50vh' }}>
         <Loader2 className="spin" size={32} />

@@ -99,7 +99,7 @@ const CaseStudyManager = () => {
     });
   };
 
-  if (isLoading) {
+  if (isLoading && studies.length === 0) {
     return (
       <div className="flex-center" style={{ height: '50vh' }}>
         <Loader2 className="spin" size={32} />
@@ -134,7 +134,7 @@ const CaseStudyManager = () => {
           >
             <div>
               <div style={{ height: '180px', overflow: 'hidden', position: 'relative' }}>
-                <img src={study.thumbnail} alt={study.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={study.thumbnail || undefined} alt={study.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <span style={{ position: 'absolute', top: '1rem', left: '1rem', background: 'var(--primary-blue)', color: 'white', fontSize: '0.75rem', fontWeight: 600, padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)' }}>
                   {study.category}
                 </span>

@@ -179,7 +179,7 @@ const ServicesManager = () => {
     }
   };
 
-  if (loadingCats || loadingServices) {
+  if ((loadingCats && categories.length === 0) || (loadingServices && services.length === 0)) {
     return (
       <div className="flex-center" style={{ height: '50vh' }}>
         <Loader2 className="spin" size={32} />

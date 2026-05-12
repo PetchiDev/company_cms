@@ -87,7 +87,7 @@ const CultureManager = () => {
     await upsertMutation.mutateAsync({ ...rec, is_active: !rec.is_active });
   };
 
-  if (isLoading) {
+  if (isLoading && items.length === 0) {
     return (
       <div className="flex-center" style={{ height: '50vh' }}>
         <Loader2 className="spin" size={32} />

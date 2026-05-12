@@ -83,7 +83,7 @@ const ImageManager = () => {
       {loading ? <p>Loading...</p> : <div className="admin-image-grid">
         {images.map((img) => (
           <div key={img.id} className={`admin-image-card ${!img.is_active ? 'admin-image-card--inactive' : ''}`}>
-            <div className="admin-image-card__img"><img src={img.url} alt={img.alt_text} /></div>
+            <div className="admin-image-card__img"><img src={img.url || undefined} alt={img.alt_text} /></div>
             <div className="admin-image-card__info"><p className="admin-image-card__name">{img.name}</p><span className="admin-image-card__category">{img.category}</span></div>
             <div className="admin-image-card__actions">
               <button onClick={() => { imageService.toggleActive(img.id, !img.is_active).then(fetch); }} className="admin-icon-btn">{img.is_active ? <Eye size={16}/> : <EyeOff size={16}/>}</button>

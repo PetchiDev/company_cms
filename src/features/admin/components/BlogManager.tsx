@@ -106,7 +106,7 @@ const BlogManager = () => {
     });
   };
 
-  if (isLoading) {
+  if (isLoading && blogs.length === 0) {
     return (
       <div className="flex-center" style={{ height: '50vh' }}>
         <Loader2 className="spin" size={32} />
@@ -141,7 +141,7 @@ const BlogManager = () => {
           >
             <div>
               <div style={{ height: '180px', overflow: 'hidden', position: 'relative' }}>
-                <img src={blog.image} alt={blog.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={blog.image || undefined} alt={blog.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <span
                   style={{
                     position: 'absolute',

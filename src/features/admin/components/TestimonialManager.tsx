@@ -99,7 +99,7 @@ const TestimonialManager = () => {
     });
   };
 
-  if (isLoading) {
+  if (isLoading && testimonials.length === 0) {
     return (
       <div className="flex-center" style={{ height: '50vh' }}>
         <Loader2 className="spin" size={32} />
@@ -137,7 +137,7 @@ const TestimonialManager = () => {
               <Quote size={40} className="text-orange" style={{ opacity: 0.1, position: 'absolute', top: '1rem', right: '1rem' }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
                 <div style={{ width: '50px', height: '50px', background: 'var(--bg-light)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.05)' }}>
-                  <img src={test.logo_url} alt={test.company} style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain' }} />
+                  <img src={test.logo_url || undefined} alt={test.company} style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain' }} />
                 </div>
                 <div>
                   <h4 style={{ margin: 0, fontWeight: 700, fontSize: '0.95rem' }}>{test.client_name || 'Anonymous'}</h4>

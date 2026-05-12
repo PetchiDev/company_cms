@@ -9,6 +9,10 @@ export const useAuth = () => {
     useAuthStore();
 
   useEffect(() => {
+    const timeoutPromise = (ms: number) => new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Request timed out')), ms)
+    );
+
     /* Get initial session */
     const initAuth = async () => {
       try {
@@ -21,14 +25,19 @@ export const useAuth = () => {
             createdAt: session.user.created_at || '',
           };
 
-          /* Check admin status */
-          const adminStatus = await authService.checkAdmin(session.user.id);
+          /* Check admin status with timeout */
+          const adminStatus = await Promise.race([
+            authService.checkAdmin(session.user.id),
+            timeoutPromise(10000)
+          ]) as boolean;
+
           setIsAdmin(adminStatus);
           setUser(profile);
         } else {
           setUser(null);
         }
-      } catch {
+      } catch (err) {
+        console.error('Auth initialization error:', err);
         setUser(null);
       }
     };
@@ -46,9 +55,18 @@ export const useAuth = () => {
             createdAt: session.user.created_at || '',
           };
 
-          const adminStatus = await authService.checkAdmin(session.user.id);
-          setIsAdmin(adminStatus);
-          setUser(profile);
+          try {
+            const adminStatus = await Promise.race([
+              authService.checkAdmin(session.user.id),
+              timeoutPromise(10000)
+            ]) as boolean;
+            setIsAdmin(adminStatus);
+            setUser(profile);
+          } catch (err) {
+            console.error('Auth state change admin check error:', err);
+            /* On timeout/error, we don't necessarily want to kick them out, 
+               but we can't confirm admin status */
+          }
         } else {
           reset();
         }
@@ -62,8 +80,19 @@ export const useAuth = () => {
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
+    
+    /* Create a timeout promise */
+    const timeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Login request timed out. Please check your connection.')), 15000)
+    );
+
     try {
-      const data = await authService.signIn(email, password);
+      /* Race the login request against the timeout */
+      const data = await Promise.race([
+        authService.signIn(email, password),
+        timeout
+      ]) as any;
+
       if (data?.user) {
         const profile = {
           id: data.user.id,
@@ -72,16 +101,24 @@ export const useAuth = () => {
           createdAt: data.user.created_at || '',
         };
 
-        const adminStatus = await authService.checkAdmin(data.user.id);
+        const adminStatus = await Promise.race([
+          authService.checkAdmin(data.user.id),
+          timeout
+        ]) as boolean;
+
         if (!adminStatus) {
-          throw new Error('You do not have administrator privileges.');
+          throw new Error('Access Denied: You do not have administrator privileges.');
         }
 
         setIsAdmin(true);
         setUser(profile);
       }
-    } catch (err) {
+    } catch (err: any) {
       reset();
+      /* Specifically handle common Supabase errors */
+      if (err?.message?.includes('Invalid login credentials')) {
+        throw new Error('Invalid email or password.');
+      }
       throw err;
     } finally {
       setIsLoading(false);
