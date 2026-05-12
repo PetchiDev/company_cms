@@ -15,19 +15,6 @@ import {
   SUPABASE_TABLES,
   IMAGE_CATEGORIES,
 } from '@/constants/appConstants';
-import {
-  COMPANY as STATIC_COMPANY,
-  CONTACT_INFO as STATIC_CONTACT,
-  SOCIAL_LINKS as STATIC_SOCIAL,
-  STATS as STATIC_STATS,
-  CERTIFICATIONS as STATIC_CERTIFICATIONS,
-  TESTIMONIALS as STATIC_TESTIMONIALS,
-  CASE_STUDIES as STATIC_CASE_STUDIES,
-  BLOG_ARTICLES as STATIC_BLOG_ARTICLES,
-  CLIENT_LOGOS as STATIC_CLIENT_LOGOS,
-  CULTURE_HIGHLIGHTS as STATIC_CULTURE_HIGHLIGHTS,
-  JOB_PORTAL_URL as STATIC_JOB_PORTAL,
-} from '@/constants/companyData';
 import { SERVICE_CATEGORIES as STATIC_SERVICE_CATEGORIES } from '@/features/services/data/servicesData';
 import type {
   Testimonial,
@@ -51,40 +38,40 @@ export const useSiteContent = () => {
 
   /* Unified Company Data Object matching COMPANY constant */
   const company = {
-    name: getText('company_name', STATIC_COMPANY.name),
-    legalName: getText('company_legal_name', STATIC_COMPANY.legalName),
-    website: getText('company_website', STATIC_COMPANY.website),
-    tagline: getText('company_tagline', STATIC_COMPANY.tagline),
-    motto: getText('company_motto', STATIC_COMPANY.motto),
-    vision: getText('company_vision', STATIC_COMPANY.vision),
-    mission: getText('company_mission', STATIC_COMPANY.mission),
-    logo: STATIC_COMPANY.logo, /* use useClientLogos hook for main dynamic logos */
-    copyright: `© ${new Date().getFullYear()} ${getText('company_name', STATIC_COMPANY.name)}`,
+    name: getText('company_name', ''),
+    legalName: getText('company_legal_name', ''),
+    website: getText('company_website', ''),
+    tagline: getText('company_tagline', ''),
+    motto: getText('company_motto', ''),
+    vision: getText('company_vision', ''),
+    mission: getText('company_mission', ''),
+    logo: '', 
+    copyright: `© ${new Date().getFullYear()} ${getText('company_name', 'Kryptos')}`,
   };
 
   /* Unified Contact Info Object matching CONTACT_INFO constant */
   const contactInfo = {
-    phone: getText('contact_phone', STATIC_CONTACT.phone),
-    email: getText('contact_email', STATIC_CONTACT.email),
+    phone: getText('contact_phone', ''),
+    email: getText('contact_email', ''),
     usOffice: {
-      label: getText('office_us_label', STATIC_CONTACT.usOffice.label),
-      address: getText('office_us_address', STATIC_CONTACT.usOffice.address),
+      label: getText('office_us_label', 'US Office'),
+      address: getText('office_us_address', ''),
     },
     indiaOffice: {
-      label: getText('office_india_label', STATIC_CONTACT.indiaOffice.label),
-      address: getText('office_india_address', STATIC_CONTACT.indiaOffice.address),
+      label: getText('office_india_label', 'India Office'),
+      address: getText('office_india_address', ''),
     },
   };
 
   /* Unified Social Links Object matching SOCIAL_LINKS constant */
   const socialLinks = {
-    linkedin: getText('social_linkedin', STATIC_SOCIAL.linkedin),
-    facebook: getText('social_facebook', STATIC_SOCIAL.facebook),
-    instagram: getText('social_instagram', STATIC_SOCIAL.instagram),
-    twitter: getText('social_twitter', STATIC_SOCIAL.twitter),
+    linkedin: getText('social_linkedin', ''),
+    facebook: getText('social_facebook', ''),
+    instagram: getText('social_instagram', ''),
+    twitter: getText('social_twitter', ''),
   };
 
-  const jobPortalUrl = getText('job_portal_url', STATIC_JOB_PORTAL);
+  const jobPortalUrl = getText('job_portal_url', '#');
 
   return { company, contactInfo, socialLinks, jobPortalUrl, isLoading, getText };
 };
@@ -103,7 +90,7 @@ export const useStats = () => {
         suffix: s.suffix,
         display: s.display,
       }))
-    : STATIC_STATS;
+    : [];
 
   return { stats, isLoading };
 };
@@ -120,7 +107,7 @@ export const useCertifications = () => {
         name: c.name,
         url: c.url,
       }))
-    : STATIC_CERTIFICATIONS;
+    : [];
 
   return { certifications, isLoading };
 };
@@ -141,7 +128,7 @@ export const useTestimonials = () => {
         quote: t.quote,
         logo: t.logo_url,
       }))
-    : STATIC_TESTIMONIALS;
+    : [];
 
   return { testimonials, isLoading };
 };
@@ -162,7 +149,7 @@ export const useCaseStudies = () => {
         thumbnail: cs.thumbnail,
         pdfLink: cs.pdf_link || undefined,
       }))
-    : STATIC_CASE_STUDIES;
+    : [];
 
   return { caseStudies, isLoading };
 };
@@ -183,7 +170,7 @@ export const useBlogArticles = () => {
         link: b.content ? `/blog/${b.id}` : (b.link || '/blog'),
         date: b.date,
       }))
-    : STATIC_BLOG_ARTICLES;
+    : [];
 
   return { blogArticles, isLoading };
 };
@@ -201,7 +188,7 @@ export const useCultureHighlights = () => {
         title: ch.title,
         description: ch.description,
       }))
-    : STATIC_CULTURE_HIGHLIGHTS;
+    : [];
 
   return { cultureHighlights, isLoading };
 };
@@ -267,7 +254,7 @@ export const useClientLogos = () => {
         name: img.name,
         url: img.url,
       }))
-    : STATIC_CLIENT_LOGOS;
+    : [];
 
   return { clientLogos, isLoading };
 };
@@ -279,7 +266,7 @@ export const useSiteLogo = () => {
     queryFn: () => mediaService.fetchByCategory(IMAGE_CATEGORIES.LOGO),
   });
 
-  const logo = dbLogos.length > 0 ? dbLogos[0].url : STATIC_COMPANY.logo;
+  const logo = dbLogos.length > 0 ? dbLogos[0].url : '';
 
   return { logo, isLoading };
 };

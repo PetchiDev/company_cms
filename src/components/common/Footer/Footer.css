@@ -191,6 +191,20 @@
 
 .footer__contact-item svg { flex-shrink: 0; margin-top: 2px; color: var(--primary-orange); }
 
+.footer__office-group {
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer__office-address {
+  margin-top: 0.25rem;
+  padding-left: 1.5rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
 /* Bottom */
 .footer__bottom {
   border-top: 1px solid rgba(255,255,255,0.06);

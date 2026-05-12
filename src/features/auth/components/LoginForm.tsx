@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { useClientLogos } from '@/hooks/useClientLogos';
+import { useSiteLogo, useSiteContent } from '@/hooks/useCMS';
 import { ROUTES } from '@/constants/routes';
-import { COMPANY } from '@/constants/companyData';
 import { fadeInUp } from '@/animations/pageTransitions';
 import './LoginForm.css';
 
 const LoginForm = () => {
-  const { logoUrl } = useClientLogos();
+  const { logo: logoUrl } = useSiteLogo();
+  const { company } = useSiteContent();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +40,7 @@ const LoginForm = () => {
       <div className="login-page__bg" />
       <motion.div className="login-card" variants={fadeInUp} initial="initial" animate="animate">
         <div className="login-card__header">
-          <img src={logoUrl} alt={COMPANY.name} className="login-card__logo" />
+          <img src={logoUrl} alt={company.name} className="login-card__logo" />
           <h1 className="login-card__title">Admin Login</h1>
           <p className="login-card__subtitle">Sign in to manage your website</p>
         </div>

@@ -15,6 +15,16 @@
   left: 0;
   bottom: 0;
   z-index: var(--z-sticky);
+  overflow-y: auto;
+}
+
+.admin-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
 }
 
 .admin-sidebar__header {

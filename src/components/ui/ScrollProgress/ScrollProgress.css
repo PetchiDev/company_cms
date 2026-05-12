@@ -8,6 +8,7 @@
   z-index: 9999;
   background: transparent;
   pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
 .scroll-progress__bar {

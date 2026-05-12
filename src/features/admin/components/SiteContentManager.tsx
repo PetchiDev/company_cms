@@ -3,31 +3,24 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { siteContentService } from '@/api/services/cmsService';
 import { Save, Loader2, Info, Phone, Share2, CheckCircle2 } from 'lucide-react';
-import {
-  COMPANY,
-  CONTACT_INFO,
-  SOCIAL_LINKS,
-  JOB_PORTAL_URL,
-} from '@/constants/companyData';
-
 const DEFAULT_SITE_CONTENT: Record<string, string> = {
-  company_name: COMPANY.name,
-  company_legal_name: COMPANY.legalName,
-  company_tagline: COMPANY.tagline,
-  company_motto: COMPANY.motto,
-  company_vision: COMPANY.vision,
-  company_mission: COMPANY.mission,
-  contact_phone: CONTACT_INFO.phone,
-  contact_email: CONTACT_INFO.email,
-  office_us_label: CONTACT_INFO.usOffice.label,
-  office_us_address: CONTACT_INFO.usOffice.address,
-  office_india_label: CONTACT_INFO.indiaOffice.label,
-  office_india_address: CONTACT_INFO.indiaOffice.address,
-  social_linkedin: SOCIAL_LINKS.linkedin,
-  social_facebook: SOCIAL_LINKS.facebook,
-  social_instagram: SOCIAL_LINKS.instagram,
-  social_twitter: SOCIAL_LINKS.twitter,
-  job_portal_url: JOB_PORTAL_URL,
+  company_name: '',
+  company_legal_name: '',
+  company_tagline: '',
+  company_motto: '',
+  company_vision: '',
+  company_mission: '',
+  contact_phone: '',
+  contact_email: '',
+  office_us_label: 'US Office',
+  office_us_address: '',
+  office_india_label: 'India Office',
+  office_india_address: '',
+  social_linkedin: '',
+  social_facebook: '',
+  social_instagram: '',
+  social_twitter: '',
+  job_portal_url: '',
 };
 
 const SiteContentManager = () => {
