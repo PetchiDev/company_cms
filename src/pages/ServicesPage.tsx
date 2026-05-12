@@ -4,10 +4,17 @@ import * as LucideIcons from 'lucide-react';
 import { ArrowRight } from 'lucide-react';
 import { useServices } from '@/hooks/useCMS';
 import { staggerContainer, staggerItem } from '@/animations/pageTransitions';
+import { useSEO } from '@/hooks/useSEO';
 import './ServicesPage.css';
 
 const ServicesPage = () => {
   const { serviceCategories } = useServices();
+
+  useSEO({
+    title: 'Services',
+    description: 'Explore the full suite of Kryptos InfoSys services, including Cloud Consulting, Application Modernization, AI/ML development, DevOps, and more.',
+    keywords: 'Kryptos InfoSys services, cloud migration, modernizing applications, DevOps pipeline, AI ML solutions, web design, corporate software'
+  });
 
   return (
     <div className="services-page">

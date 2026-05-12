@@ -15,6 +15,7 @@ import {
   useClientLogos,
 } from '@/hooks/useCMS';
 import { ROUTES } from '@/constants/routes';
+import { useSEO } from '@/hooks/useSEO';
 import { contactService } from '@/api/services/contactService';
 import { BUDGET_RANGES } from '@/constants/appConstants';
 import type { ContactFormData } from '@/types/contact.types';
@@ -33,6 +34,12 @@ const HomePage = () => {
   const { caseStudies } = useCaseStudies();
   const { clientLogos } = useClientLogos();
   const { serviceCategories } = useServices();
+
+  useSEO({
+    title: 'Smart IT Solutions',
+    description: 'Kryptos InfoSys - Revolutionizing Business with Smart IT Solutions. Leading provider of Application Modernization, Cloud Consulting, AI/ML, DevOps, and more.',
+    keywords: 'Kryptos InfoSys, Smart IT Solutions, cloud consulting, Application Modernization, artificial intelligence, machine learning, DevOps, IT services'
+  });
 
   const heroRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);

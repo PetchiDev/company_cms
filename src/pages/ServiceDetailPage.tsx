@@ -5,6 +5,7 @@ import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { useServices } from '@/hooks/useCMS';
 import { ROUTES } from '@/constants/routes';
 import { fadeInUp, staggerContainer, staggerItem } from '@/animations/pageTransitions';
+import { useSEO } from '@/hooks/useSEO';
 import './ServicesPage.css';
 
 const ServiceDetailPage = () => {
@@ -13,6 +14,12 @@ const ServiceDetailPage = () => {
   const service = serviceCategories
     .flatMap((c) => c.services)
     .find((s) => s.slug === slug);
+
+  useSEO({
+    title: service ? service.title : 'Service Detail',
+    description: service ? service.fullDescription : 'Kryptos InfoSys professional services detail',
+    keywords: service ? `Kryptos InfoSys, ${service.title}, ${service.features.join(', ')}` : 'Kryptos InfoSys services'
+  });
 
   if (!service) {
     return (

@@ -2,11 +2,18 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download } from 'lucide-react';
 import { useCaseStudies } from '@/hooks/useCMS';
+import { useSEO } from '@/hooks/useSEO';
 import { staggerContainer, staggerItem } from '@/animations/pageTransitions';
 
 const CaseStudiesPage = () => {
   const { caseStudies } = useCaseStudies();
   const [activeFilter, setActiveFilter] = useState('All');
+
+  useSEO({
+    title: 'Case Studies',
+    description: 'Explore the portfolio and real-world success stories of Kryptos InfoSys. Read our deep-dive case studies on modernizing applications, deploying clouds, and developing customized IT solutions.',
+    keywords: 'Kryptos InfoSys case studies, cloud success stories, client portfolio, IT solutions real world application'
+  });
 
   const categories = ['All', ...new Set(caseStudies.map((cs) => cs.category))];
   const filtered = activeFilter === 'All' ? caseStudies : caseStudies.filter((cs) => cs.category === activeFilter);

@@ -6,6 +6,8 @@ import { BUDGET_RANGES } from '@/constants/appConstants';
 import { contactService } from '@/api/services/contactService';
 import type { ContactFormData } from '@/types/contact.types';
 
+import { useSEO } from '@/hooks/useSEO';
+
 const SocialIcon = ({ name }: { name: string }) => {
   const n = name.toLowerCase();
   if (n.includes('linkedin')) return (
@@ -29,6 +31,12 @@ const ContactPage = () => {
     name: '', email: '', phone: '', company: '', message: '', budget: '$20,000–$50,000', wants_nda: false,
   });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  useSEO({
+    title: 'Contact Us',
+    description: 'Get in touch with Kryptos InfoSys. Reach out to us via email, phone, or by submitting a project request directly. We are ready to collaborate!',
+    keywords: 'Kryptos InfoSys contact, IT consulting inquiry, software request, get a quote, business collaboration'
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

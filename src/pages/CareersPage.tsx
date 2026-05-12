@@ -4,11 +4,18 @@ import * as LucideIcons from 'lucide-react';
 import { useSiteContent, useCultureHighlights } from '@/hooks/useCMS';
 import { staggerContainer, staggerItem } from '@/animations/pageTransitions';
 import ParticleField from '@/components/ui/ParticleField/ParticleField';
+import { useSEO } from '@/hooks/useSEO';
 import './CareersPage.css';
 
 const CareersPage = () => {
   const { company, jobPortalUrl } = useSiteContent();
   const { cultureHighlights } = useCultureHighlights();
+
+  useSEO({
+    title: 'Careers',
+    description: `Join our team at ${company.name || 'Kryptos InfoSys'}. Learn more about our company culture and explore career opportunities.`,
+    keywords: 'Kryptos InfoSys careers, join our team, job openings, developer jobs, IT recruitment'
+  });
 
   return (
     <div className="careers-page">

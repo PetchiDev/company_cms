@@ -3,6 +3,7 @@ import { Target, Eye, Handshake, Lightbulb, Users, Zap } from 'lucide-react';
 import { useSiteContent } from '@/hooks/useCMS';
 import { staggerContainer, staggerItem, fadeInUp } from '@/animations/pageTransitions';
 import { useTextScramble } from '@/hooks/useTextScramble';
+import { useSEO } from '@/hooks/useSEO';
 import GlassCard from '@/components/ui/GlassCard/GlassCard';
 import './AboutPage.css';
 
@@ -24,6 +25,12 @@ const approach = [
 const AboutPage = () => {
   const { company } = useSiteContent();
   const scrambledName = useTextScramble({ text: company.name, delay: 500, speed: 40, cycles: 6 });
+
+  useSEO({
+    title: 'About Us',
+    description: `Learn more about ${company.name || 'Kryptos InfoSys'}. Our vision is: ${company.vision}. Our mission is: ${company.mission}.`,
+    keywords: 'Kryptos InfoSys, about us, corporate values, business vision, corporate mission, IT expertise'
+  });
 
   return (
     <div className="about-page">

@@ -3,10 +3,17 @@ import { motion } from 'framer-motion';
 import { ExternalLink, ArrowRight } from 'lucide-react';
 import { useBlogArticles } from '@/hooks/useCMS';
 import { staggerContainer, staggerItem } from '@/animations/pageTransitions';
+import { useSEO } from '@/hooks/useSEO';
 import './BlogPage.css';
 
 const BlogPage = () => {
   const { blogArticles: articles, isLoading } = useBlogArticles();
+
+  useSEO({
+    title: 'Blog & Insights',
+    description: 'Stay updated with the latest in technology, IT solutions, and software developments. Read Kryptos InfoSys insights, news articles, and technological trends.',
+    keywords: 'Kryptos InfoSys blog, IT trends, cloud news, AI articles, tech insights'
+  });
 
   return (
     <div>

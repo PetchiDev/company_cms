@@ -5,6 +5,7 @@ import { ArrowLeft, Calendar, User, Clock, AlertTriangle } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { blogService } from '@/api/services/cmsService';
 import { QUERY_KEYS } from '@/constants/queryKeys';
+import { useSEO } from '@/hooks/useSEO';
 import './BlogPage.css';
 
 const BlogDetailPage = () => {
@@ -17,6 +18,12 @@ const BlogDetailPage = () => {
       return blogService.fetchById(id);
     },
     enabled: !!id,
+  });
+
+  useSEO({
+    title: article ? article.title : 'Blog Detail',
+    description: article ? article.excerpt : 'Read this article from Kryptos InfoSys insights blog.',
+    keywords: article ? `Kryptos InfoSys blog, ${article.title}` : 'Kryptos InfoSys insights'
   });
 
   if (isLoading) {
