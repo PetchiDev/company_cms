@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/common/Navbar/Navbar';
 import Footer from '@/components/common/Footer/Footer';
+import ScrollProgress from '@/components/ui/ScrollProgress/ScrollProgress';
 
 const MainLayout = () => {
   const { pathname } = useLocation();
@@ -13,6 +14,7 @@ const MainLayout = () => {
 
   return (
     <div className="main-layout">
+      <ScrollProgress />
       <Navbar />
       <main className="main-content">
         <Outlet />

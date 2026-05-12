@@ -15,9 +15,10 @@ const CaseStudiesPage = () => {
     <div>
       <section className="page-hero">
         <div className="page-hero__bg" />
+        <div className="floating-shape floating-shape--1" />
         <div className="container page-hero__content">
           <motion.span className="page-hero__label" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>Our Work</motion.span>
-          <motion.h1 className="page-hero__title" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>Case <span className="text-orange">Studies</span></motion.h1>
+          <motion.h1 className="page-hero__title" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>Case <span className="text-gradient-animated">Studies</span></motion.h1>
         </div>
       </section>
 
@@ -25,14 +26,29 @@ const CaseStudiesPage = () => {
         <div className="container">
           <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
             {categories.map((cat) => (
-              <button key={cat} onClick={() => setActiveFilter(cat)} className="btn" style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', background: activeFilter === cat ? 'var(--primary-blue)' : 'var(--bg-light)', color: activeFilter === cat ? 'white' : 'var(--dark-text)', borderRadius: 'var(--radius-full)' }}>{cat}</button>
+              <button
+                key={cat}
+                onClick={() => setActiveFilter(cat)}
+                className="magnetic-btn"
+                style={{
+                  padding: '0.5rem 1.2rem',
+                  fontSize: '0.85rem',
+                  background: activeFilter === cat ? 'var(--primary-orange)' : 'rgba(238,79,41,0.06)',
+                  color: activeFilter === cat ? 'white' : 'var(--dark-text)',
+                  borderRadius: 'var(--radius-full)',
+                  border: `1px solid ${activeFilter === cat ? 'var(--primary-orange)' : 'rgba(238,79,41,0.1)'}`,
+                  boxShadow: activeFilter === cat ? '0 5px 20px rgba(238,79,41,0.2)' : 'none',
+                }}
+              >
+                {cat}
+              </button>
             ))}
           </div>
 
-          <motion.div className="case-studies-grid" variants={staggerContainer} initial="initial" animate="animate" key={activeFilter}>
+          <motion.div className="case-studies-grid perspective-1000" variants={staggerContainer} initial="initial" animate="animate" key={activeFilter}>
             <AnimatePresence mode="popLayout">
               {filtered.map((cs) => (
-                <motion.div key={cs.id} variants={staggerItem} layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.3 }} className="case-study-card">
+                <motion.div key={cs.id} variants={staggerItem} layout initial={{ opacity: 0, scale: 0.9, rotateX: 10 }} animate={{ opacity: 1, scale: 1, rotateX: 0 }} exit={{ opacity: 0, scale: 0.9, rotateX: -10 }} transition={{ duration: 0.4 }} className="case-study-card">
                   <div className="case-study-card__img">
                     <img src={cs.thumbnail} alt={cs.title} loading="lazy" />
                     <span className="case-study-card__category">{cs.category}</span>

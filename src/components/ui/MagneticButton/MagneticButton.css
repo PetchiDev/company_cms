@@ -1,0 +1,125 @@
+/* ═══ Magnetic Button — Premium ═══ */
+.magnetic-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  border: none;
+  overflow: hidden;
+  will-change: transform;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.magnetic-btn__text {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.magnetic-btn__glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 70%
+  );
+  z-index: 1;
+}
+
+.magnetic-btn__shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transform: skewX(-20deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.magnetic-btn:hover .magnetic-btn__glow {
+  opacity: 1;
+}
+
+.magnetic-btn:hover .magnetic-btn__shimmer {
+  left: 200%;
+  transition: left 0.8s ease;
+}
+
+/* Sizes */
+.magnetic-btn--sm { padding: 0.5rem 1.2rem; font-size: 0.8rem; }
+.magnetic-btn--md { padding: 0.85rem 2rem; font-size: 0.9rem; }
+.magnetic-btn--lg { padding: 1.1rem 2.8rem; font-size: 1rem; }
+.magnetic-btn--xl { padding: 1.25rem 3.5rem; font-size: 1.1rem; }
+
+/* Variants */
+.magnetic-btn--primary {
+  background: var(--dark-navy);
+  color: white;
+}
+
+.magnetic-btn--primary:hover {
+  background: #1a1e4a;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(10, 13, 49, 0.2);
+}
+
+.magnetic-btn--orange {
+  background: linear-gradient(135deg, var(--primary-orange), #ff6b3d);
+  color: white;
+}
+
+.magnetic-btn--orange:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 15px 40px rgba(238, 79, 41, 0.35);
+}
+
+.magnetic-btn--premium {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.magnetic-btn--premium:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 0 0 20px rgba(238, 79, 41, 0.2);
+  border-color: rgba(238, 79, 41, 0.4);
+}
+
+.magnetic-btn--outline {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  color: var(--dark-navy);
+  border: 1px solid rgba(10, 13, 49, 0.15);
+}
+
+.magnetic-btn--outline:hover {
+  background: white;
+  border-color: var(--primary-orange);
+  color: var(--primary-orange);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 30px rgba(238, 79, 41, 0.1);
+}
+
+.magnetic-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

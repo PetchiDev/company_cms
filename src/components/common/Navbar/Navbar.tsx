@@ -4,13 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ChevronDown, Phone } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { useClientLogos } from '@/hooks/useClientLogos';
-import { useSiteContent, useServices } from '@/hooks/useCMS';
+import { useSiteContent, useServices, useSiteLogo } from '@/hooks/useCMS';
 import { mobileMenuVariants, dropdownVariants } from '@/animations/pageTransitions';
 import './Navbar.css';
 
 const Navbar = () => {
-  const { logoUrl } = useClientLogos();
+  const { logo } = useSiteLogo();
   const { company } = useSiteContent();
   const { serviceCategories } = useServices();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -50,7 +49,7 @@ const Navbar = () => {
         {/* Logo */}
         <Link to={ROUTES.HOME} className="navbar__logo" aria-label="Kryptos InfoSys Home">
           <img
-            src={logoUrl}
+            src={logo}
             alt={company.name}
             className="navbar__logo-img"
             loading="eager"

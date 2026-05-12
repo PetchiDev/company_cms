@@ -24,7 +24,8 @@ export const SUPABASE_BUCKETS = {
 
 export const IMAGE_CATEGORIES = {
   BANNER: 'banner',
-  CLIENT_LOGO: 'client_logo',
+  LOGO: 'logo',
+  CLIENTS: 'clients',
   GALLERY: 'gallery',
   TEAM: 'team',
   CASE_STUDY: 'case_study',

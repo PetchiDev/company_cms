@@ -51,6 +51,8 @@ const BlogDetailPage = () => {
     <div className="blog-detail-page" style={{ paddingBottom: '4rem' }}>
       <section className="page-hero" style={{ padding: '8rem 0 4rem' }}>
         <div className="page-hero__bg" />
+        <div className="floating-shape floating-shape--1" />
+        <div className="floating-shape floating-shape--3" />
         <div className="container page-hero__content" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-start' }}>
           <Link to={ROUTES.BLOG} className="page-hero__back" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem', marginBottom: '1rem' }}>
             <ArrowLeft size={16} /> All Articles
@@ -104,8 +106,9 @@ const BlogDetailPage = () => {
           />
 
           <div style={{ marginTop: '4rem', paddingTop: '2rem', borderTop: '1px solid rgba(0,0,0,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Link to={ROUTES.BLOG} className="btn btn--outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ArrowLeft size={16} /> Back to Blog
+            <Link to={ROUTES.BLOG} className="magnetic-btn magnetic-btn--outline magnetic-btn--md">
+              <span className="magnetic-btn__text"><ArrowLeft size={16} /> Back to Blog</span>
+              <span className="magnetic-btn__glow" />
             </Link>
           </div>
         </div>

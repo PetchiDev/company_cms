@@ -2,14 +2,38 @@
 
 .culture-card {
   padding: 2rem;
-  background: white;
-  border: 1px solid rgba(0,0,0,0.06);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(238, 79, 41, 0.06);
   border-radius: var(--radius-lg);
   text-align: center;
-  transition: all var(--transition-smooth);
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
 }
 
-.culture-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+.culture-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    300px circle at 50% 0%,
+    rgba(238, 79, 41, 0.06),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.culture-card:hover::before { opacity: 1; }
+
+.culture-card:hover {
+  transform: translateY(-8px) rotateX(3deg);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 0 30px rgba(238, 79, 41, 0.06);
+  border-color: rgba(238, 79, 41, 0.2);
+}
 
 .culture-card__icon {
   width: 60px;
@@ -21,10 +45,22 @@
   color: var(--primary-orange);
   border-radius: var(--radius-md);
   margin: 0 auto 1.25rem;
+  transition: all 0.4s ease;
 }
 
-.culture-card:hover .culture-card__icon { background: var(--primary-orange); color: white; }
+.culture-card:hover .culture-card__icon {
+  background: var(--primary-orange);
+  color: white;
+  transform: rotateY(180deg) scale(1.1);
+  box-shadow: 0 5px 20px rgba(238, 79, 41, 0.3);
+}
+
 .culture-card h3 { margin-bottom: 0.5rem; font-size: 1.1rem; }
 .culture-card p { font-size: 0.9rem; color: var(--muted-text); }
+
+.careers-cta-section {
+  position: relative;
+  overflow: hidden;
+}
 
 @media (max-width: 768px) { .culture-grid { grid-template-columns: 1fr; } }

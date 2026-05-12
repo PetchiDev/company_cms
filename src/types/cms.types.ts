@@ -94,3 +94,12 @@ export interface ServiceRecord {
   is_active: boolean;
   created_at: string;
 }
+
+export interface ImageRecord {
+  id: string;
+  url: string;
+  name: string;
+  category: string;
+  sort_order: number;
+  created_at: string;
+}

@@ -1,0 +1,54 @@
+/* ═══ Glass Card with 3D Tilt ═══ */
+.glass-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: var(--radius-xl);
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+  will-change: transform;
+  transform-style: preserve-3d;
+  overflow: hidden;
+}
+
+.glass-card:hover {
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12), 0 0 30px rgba(238, 79, 41, 0.08);
+  border-color: rgba(238, 79, 41, 0.2);
+}
+
+/* Glow border effect - follows mouse position */
+.glass-card__glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: radial-gradient(
+    300px circle at var(--glow-x, 50%) var(--glow-y, 50%),
+    rgba(238, 79, 41, 0.2),
+    transparent 60%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 0;
+}
+
+.glass-card:hover .glass-card__glow {
+  opacity: 1;
+}
+
+.glass-card__content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Dark variant for dark sections */
+.glass-card--dark {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.glass-card--dark:hover {
+  border-color: rgba(238, 79, 41, 0.3);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3), 0 0 30px rgba(238, 79, 41, 0.1);
+}

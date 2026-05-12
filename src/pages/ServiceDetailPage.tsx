@@ -18,7 +18,10 @@ const ServiceDetailPage = () => {
     return (
       <div className="section flex-center" style={{ minHeight: '60vh', flexDirection: 'column', gap: '1rem' }}>
         <h2>Service Not Found</h2>
-        <Link to={ROUTES.SERVICES} className="btn btn--primary"><ArrowLeft size={16} /> Back to Services</Link>
+        <Link to={ROUTES.SERVICES} className="magnetic-btn magnetic-btn--primary magnetic-btn--md">
+          <span className="magnetic-btn__text"><ArrowLeft size={16} /> Back to Services</span>
+          <span className="magnetic-btn__glow" />
+        </Link>
       </div>
     );
   }
@@ -29,9 +32,11 @@ const ServiceDetailPage = () => {
     <div className="service-detail-page">
       <section className="page-hero">
         <div className="page-hero__bg" />
+        <div className="floating-shape floating-shape--1" />
+        <div className="floating-shape floating-shape--2" />
         <div className="container page-hero__content">
           <Link to={ROUTES.SERVICES} className="page-hero__back"><ArrowLeft size={16} /> All Services</Link>
-          <motion.div className="service-detail__icon-large" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', delay: 0.2 }}>
+          <motion.div className="service-detail__icon-large" initial={{ scale: 0, rotateY: -180 }} animate={{ scale: 1, rotateY: 0 }} transition={{ type: 'spring', delay: 0.2, duration: 0.8 }}>
             <IconComponent size={48} />
           </motion.div>
           <motion.h1 className="page-hero__title" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>{service.title}</motion.h1>
@@ -65,7 +70,10 @@ const ServiceDetailPage = () => {
           )}
 
           <div className="text-center" style={{ marginTop: '3rem' }}>
-            <Link to={ROUTES.CONTACT} className="btn btn--primary">Get Started with {service.title}</Link>
+            <Link to={ROUTES.CONTACT} className="magnetic-btn magnetic-btn--primary magnetic-btn--md">
+              <span className="magnetic-btn__text">Get Started with {service.title}</span>
+              <span className="magnetic-btn__glow" />
+            </Link>
           </div>
         </div>
       </section>

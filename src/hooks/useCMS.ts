@@ -9,7 +9,12 @@ import {
   blogService,
   cultureService,
   servicesService,
+  mediaService,
 } from '@/api/services/cmsService';
+import {
+  SUPABASE_TABLES,
+  IMAGE_CATEGORIES,
+} from '@/constants/appConstants';
 import {
   COMPANY as STATIC_COMPANY,
   CONTACT_INFO as STATIC_CONTACT,
@@ -19,6 +24,7 @@ import {
   TESTIMONIALS as STATIC_TESTIMONIALS,
   CASE_STUDIES as STATIC_CASE_STUDIES,
   BLOG_ARTICLES as STATIC_BLOG_ARTICLES,
+  CLIENT_LOGOS as STATIC_CLIENT_LOGOS,
   CULTURE_HIGHLIGHTS as STATIC_CULTURE_HIGHLIGHTS,
   JOB_PORTAL_URL as STATIC_JOB_PORTAL,
 } from '@/constants/companyData';
@@ -247,4 +253,33 @@ export const useServices = () => {
   };
 
   return { serviceCategories, allServices, getServiceBySlug, isLoading };
+};
+
+/* ─── 9. CLIENT LOGOS HOOK ─── */
+export const useClientLogos = () => {
+  const { data: dbLogos = [], isLoading } = useQuery({
+    queryKey: [QUERY_KEYS.IMAGES, IMAGE_CATEGORIES.CLIENTS],
+    queryFn: () => mediaService.fetchByCategory(IMAGE_CATEGORIES.CLIENTS),
+  });
+
+  const clientLogos = dbLogos.length > 0
+    ? dbLogos.map((img) => ({
+        name: img.name,
+        url: img.url,
+      }))
+    : STATIC_CLIENT_LOGOS;
+
+  return { clientLogos, isLoading };
+};
+
+/* ─── 10. SITE LOGO HOOK ─── */
+export const useSiteLogo = () => {
+  const { data: dbLogos = [], isLoading } = useQuery({
+    queryKey: [QUERY_KEYS.IMAGES, IMAGE_CATEGORIES.LOGO],
+    queryFn: () => mediaService.fetchByCategory(IMAGE_CATEGORIES.LOGO),
+  });
+
+  const logo = dbLogos.length > 0 ? dbLogos[0].url : STATIC_COMPANY.logo;
+
+  return { logo, isLoading };
 };

@@ -12,7 +12,8 @@ export interface ImageRecord {
 
 export type ImageCategory =
   | 'banner'
-  | 'client_logo'
+  | 'logo'
+  | 'clients'
   | 'gallery'
   | 'team'
   | 'case_study'

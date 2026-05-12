@@ -13,10 +13,12 @@ const ServicesPage = () => {
     <div className="services-page">
       <section className="page-hero">
         <div className="page-hero__bg" />
+        <div className="floating-shape floating-shape--1" />
+        <div className="floating-shape floating-shape--3" />
         <div className="container page-hero__content">
           <motion.span className="page-hero__label" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>Our Expertise</motion.span>
           <motion.h1 className="page-hero__title" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-            Business & <span className="text-orange">Services</span>
+            Business & <span className="text-gradient-animated">Services</span>
           </motion.h1>
           <motion.p className="page-hero__subtitle" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
             Comprehensive IT solutions to transform your business and accelerate digital growth
@@ -31,7 +33,7 @@ const ServicesPage = () => {
               <span className="section-heading__label">{category.title}</span>
               <h2 className="section-heading__title">{category.title}</h2>
             </div>
-            <motion.div className="services-grid" variants={staggerContainer} initial="initial" whileInView="animate" viewport={{ once: true, margin: '-50px' }}>
+            <motion.div className="services-grid perspective-1000" variants={staggerContainer} initial="initial" whileInView="animate" viewport={{ once: true, margin: '-50px' }}>
               {category.services.map((service) => {
                 const IconComponent = (LucideIcons as any)[service.icon] || LucideIcons.Cog;
                 return (

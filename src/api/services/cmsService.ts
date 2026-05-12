@@ -11,6 +11,7 @@ import type {
   CultureHighlightRecord,
   ServiceCategoryRecord,
   ServiceRecord,
+  ImageRecord,
 } from '@/types/cms.types';
 
 // Browser-native cross-tab broadcast synchronization trigger
@@ -325,5 +326,18 @@ export const servicesService = {
     if (error) throw error;
 
     broadcastInvalidation(QUERY_KEYS.SERVICES);
+  },
+};
+
+/* ─── 9. MEDIA SERVICE ─── */
+export const mediaService = {
+  fetchByCategory: async (category: string): Promise<ImageRecord[]> => {
+    const { data, error } = await supabase
+      .from(SUPABASE_TABLES.IMAGES)
+      .select('*')
+      .eq('category', category)
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+    return data || [];
   },
 };

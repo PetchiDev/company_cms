@@ -2,8 +2,7 @@ import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, ArrowUp } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { useState } from 'react';
-import { useClientLogos } from '@/hooks/useClientLogos';
-import { useSiteContent, useServices } from '@/hooks/useCMS';
+import { useSiteContent, useServices, useSiteLogo } from '@/hooks/useCMS';
 import { newsletterService } from '@/api/services/newsletterService';
 import './Footer.css';
 
@@ -18,7 +17,7 @@ const SocialIcon = ({ name }: { name: string }) => {
 };
 
 const Footer = () => {
-  const { logoUrl } = useClientLogos();
+  const { logo } = useSiteLogo();
   const { company, contactInfo, socialLinks } = useSiteContent();
   const { serviceCategories } = useServices();
   const [email, setEmail] = useState('');
@@ -60,7 +59,7 @@ const Footer = () => {
         <div className="container">
           <div className="footer__grid">
             <div className="footer__col">
-              <img src={logoUrl} alt={company.name} className="footer__logo" loading="lazy" />
+              <img src={logo} alt={company.name} className="footer__logo" loading="lazy" />
               <p className="footer__tagline">{company.motto}</p>
               <div className="footer__social">
                 {Object.entries(socialLinks).map(([name, url]) => (
