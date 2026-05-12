@@ -4,11 +4,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { testimonialService } from '@/api/services/cmsService';
 import type { TestimonialRecord } from '@/types/cms.types';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X, Quote } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X, Quote, Table as TableIcon, LayoutGrid } from 'lucide-react';
+import { AdminTable } from '@/components/common/AdminTable/AdminTable';
+import { useToast } from '@/components/ui/Toast/ToastProvider';
+import { useConfirm } from '@/components/ui/Modal/ConfirmProvider';
 
 const TestimonialManager = () => {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
+  const confirm = useConfirm();
   const [modalOpen, setModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [editingRecord, setEditingRecord] = useState<TestimonialRecord | null>(null);
 
   /* Form Fields */
@@ -29,14 +35,17 @@ const TestimonialManager = () => {
     mutationFn: (record: Partial<TestimonialRecord>) => testimonialService.upsert(record),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.TESTIMONIALS] });
+      showToast('Testimonial saved!', 'success');
       closeModal();
     },
+    onError: () => showToast('Failed to save testimonial.', 'error'),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => testimonialService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.TESTIMONIALS] });
+      showToast('Testimonial deleted.', 'info');
     },
   });
 
@@ -87,7 +96,13 @@ const TestimonialManager = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this testimonial?')) {
+    const isConfirmed = await confirm({
+      title: 'Delete Testimonial',
+      message: 'Are you sure you want to delete this testimonial? This action is permanent and cannot be undone.',
+      type: 'danger',
+      confirmText: 'Delete'
+    });
+    if (isConfirmed) {
       await deleteMutation.mutateAsync(id);
     }
   };
@@ -99,108 +114,163 @@ const TestimonialManager = () => {
     });
   };
 
+  const columns = [
+    {
+      header: 'Logo',
+      accessor: (test: TestimonialRecord) => (
+        <div style={{ height: '32px', width: '60px', background: 'var(--bg-light)', borderRadius: '4px', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src={test.logo_url || undefined} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+        </div>
+      ),
+      width: '80px'
+    },
+    {
+      header: 'Client',
+      accessor: 'client_name' as keyof TestimonialRecord,
+      sortable: true,
+      filterable: true,
+    },
+    {
+      header: 'Company',
+      accessor: 'company' as keyof TestimonialRecord,
+      sortable: true,
+      filterable: true,
+    },
+    {
+      header: 'Quote',
+      accessor: (test: TestimonialRecord) => (
+        <span style={{ fontSize: '0.8rem', color: 'var(--muted-text)', display: 'block', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          "{test.quote}"
+        </span>
+      ),
+    },
+    {
+      header: 'Status',
+      accessor: (test: TestimonialRecord) => (
+        <span className={`status-badge ${test.is_active ? 'status-badge--active' : 'status-badge--inactive'}`}>
+          {test.is_active ? 'Active' : 'Inactive'}
+        </span>
+      ),
+      width: '100px'
+    }
+  ];
+
   if (isLoading && testimonials.length === 0) {
     return (
       <div className="flex-center" style={{ height: '50vh' }}>
-        <Loader2 className="spin" size={32} />
+        <Loader2 className="spin" size={32} color="var(--primary-orange)" />
       </div>
     );
   }
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h1 className="admin-page__title" style={{ margin: 0 }}>Testimonials Manager</h1>
-        <button onClick={openCreateModal} className="btn btn--orange" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Plus size={16} /> Add Testimonial
-        </button>
+    <div className="admin-content-area">
+      <div className="admin-header-row">
+        <div>
+          <h1 className="admin-page__title">Testimonials</h1>
+          <p className="admin-page__subtitle">Manage client feedback and success stories</p>
+        </div>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <div className="admin-toggle-group">
+            <button className={`toggle-btn ${viewMode === 'table' ? 'active' : ''}`} onClick={() => setViewMode('table')}><TableIcon size={18} /></button>
+            <button className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')}><LayoutGrid size={18} /></button>
+          </div>
+          <button onClick={openCreateModal} className="creative-btn creative-btn--sliding parallelogram" style={{ 
+            background: 'var(--primary-orange)', 
+            color: 'white', 
+            padding: '0.8rem 2rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            fontWeight: 700
+          }}>
+            <Plus size={18} /> <span>ADD REVIEW</span>
+          </button>
+        </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
-        {testimonials.map((test) => (
-          <div
-            key={test.id}
-            style={{
-              background: 'white',
-              padding: '1.75rem',
-              borderRadius: 'var(--radius-lg)',
-              boxShadow: 'var(--shadow-sm)',
-              border: '1px solid rgba(0,0,0,0.05)',
-              opacity: test.is_active ? 1 : 0.6,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              position: 'relative',
-            }}
-          >
-            <div>
-              <Quote size={40} className="text-orange" style={{ opacity: 0.1, position: 'absolute', top: '1rem', right: '1rem' }} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <div style={{ width: '50px', height: '50px', background: 'var(--bg-light)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.05)' }}>
-                  <img src={test.logo_url || undefined} alt={test.company} style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain' }} />
+      {viewMode === 'table' ? (
+        <AdminTable
+          data={testimonials}
+          columns={columns}
+          title="All Testimonials"
+          actions={(test) => (
+            <div className="table-actions">
+              <button onClick={() => openEditModal(test)} className="admin-icon-btn" title="Edit">
+                <Edit2 size={16} />
+              </button>
+              <button onClick={() => handleToggleActive(test)} className="admin-icon-btn" title={test.is_active ? 'Deactivate' : 'Activate'}>
+                {test.is_active ? <Eye size={16} /> : <EyeOff size={16} />}
+              </button>
+              <button onClick={() => handleDelete(test.id)} className="admin-icon-btn admin-icon-btn--danger" title="Delete">
+                <Trash2 size={16} />
+              </button>
+            </div>
+          )}
+        />
+      ) : (
+        <div className="admin-card-grid slide-in-up">
+          {testimonials.map((test) => (
+            <div key={test.id} className="modern-card" style={{ opacity: test.is_active ? 1 : 0.6, padding: '1.5rem' }}>
+              <Quote size={32} style={{ color: 'var(--primary-orange)', opacity: 0.2, position: 'absolute', top: '1rem', right: '1rem' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '8px', background: 'var(--bg-light)', padding: '4px', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <img src={test.logo_url || undefined} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
                 </div>
                 <div>
-                  <h4 style={{ margin: 0, fontWeight: 700, fontSize: '0.95rem' }}>{test.client_name || 'Anonymous'}</h4>
-                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted-text)' }}>
-                    {test.client_title ? `${test.client_title}, ` : ''}{test.company}
-                  </p>
+                  <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>{test.client_name}</h4>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted-text)' }}>{test.company}</p>
                 </div>
               </div>
-              <p style={{ fontSize: '0.85rem', lineHeight: 1.6, fontStyle: 'italic', color: 'var(--dark-text)' }}>
+              <p style={{ fontSize: '0.85rem', fontStyle: 'italic', color: 'var(--dark-text)', lineHeight: 1.6, flex: 1 }}>
                 "{test.quote}"
               </p>
+              <div className="modern-card__footer" style={{ borderTop: 'none', padding: 0 }}>
+                 <div className="table-actions" style={{ width: '100%', marginTop: '1rem' }}>
+                  <button onClick={() => openEditModal(test)} className="admin-icon-btn" style={{ flex: 1 }}><Edit2 size={14} /> Edit</button>
+                  <button onClick={() => handleDelete(test.id)} className="admin-icon-btn admin-icon-btn--danger"><Trash2 size={14} /></button>
+                </div>
+              </div>
             </div>
-
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '1rem' }}>
-              <button onClick={() => openEditModal(test)} className="admin-icon-btn" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
-                <Edit2 size={14} /> Edit
-              </button>
-              <button onClick={() => handleToggleActive(test)} className="admin-icon-btn" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
-                {test.is_active ? <Eye size={14} /> : <EyeOff size={14} />} {test.is_active ? 'Hide' : 'Show'}
-              </button>
-              <button onClick={() => handleDelete(test.id)} className="admin-icon-btn admin-icon-btn--danger" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
-                <Trash2 size={14} /> Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* MODAL FORM */}
       {modalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <div style={{ background: 'white', padding: '2rem', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '500px', boxShadow: 'var(--shadow-lg)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 style={{ margin: 0, color: 'var(--dark-navy)' }}>{editingRecord ? 'Edit Testimonial' : 'Add Testimonial'}</h3>
-              <button onClick={closeModal} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+        <div className="modal-overlay">
+          <div className="modal-card slide-in-up">
+            <div className="modal-header">
+              <h3 className="modal-title">{editingRecord ? 'Edit Testimonial' : 'New Testimonial'}</h3>
+              <button onClick={closeModal} className="modal-close"><X size={24} /></button>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Client Name</label>
-                  <input type="text" required placeholder="e.g. John Doe" value={clientName} onChange={(e) => setClientName(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+            <form onSubmit={handleSubmit} className="modal-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Client Name</label>
+                  <input type="text" required placeholder="e.g. John Doe" value={clientName} onChange={(e) => setClientName(e.target.value)} className="admin-input" />
                 </div>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Client Title</label>
-                  <input type="text" placeholder="e.g. CEO (optional)" value={clientTitle} onChange={(e) => setClientTitle(e.target.value)} className="admin-input" style={{ width: '100%' }} />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Company Name</label>
-                  <input type="text" required placeholder="e.g. Acme Corp" value={company} onChange={(e) => setCompany(e.target.value)} className="admin-input" style={{ width: '100%' }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Sort Order</label>
-                  <input type="number" required value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+                <div className="form-group">
+                  <label>Title/Role</label>
+                  <input type="text" placeholder="e.g. CEO (optional)" value={clientTitle} onChange={(e) => setClientTitle(e.target.value)} className="admin-input" />
                 </div>
               </div>
 
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Quote / Review</label>
-                <textarea required placeholder="Write the testimonial review text..." value={quote} onChange={(e) => setQuote(e.target.value)} className="admin-input" rows={4} style={{ width: '100%', resize: 'none' }} />
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Company</label>
+                  <input type="text" required value={company} onChange={(e) => setCompany(e.target.value)} className="admin-input" />
+                </div>
+                <div className="form-group">
+                  <label>Sort Order</label>
+                  <input type="number" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="admin-input" />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Quote Content</label>
+                <textarea required rows={4} value={quote} onChange={(e) => setQuote(e.target.value)} className="admin-input" style={{ resize: 'none' }} />
               </div>
 
               <ImageInputWithUpload
@@ -208,17 +278,24 @@ const TestimonialManager = () => {
                 value={logoUrl}
                 onChange={setLogoUrl}
                 category="testimonials"
-                placeholder="e.g. https://..."
               />
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-                Is Active (Display on site)
-              </label>
-
-              <button type="submit" className="btn btn--orange" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}>
-                {upsertMutation.isPending ? 'Saving...' : 'Save Testimonial'}
-              </button>
+              <div className="flex-between">
+                <label className="toggle-switch">
+                  <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Active</span>
+                </label>
+                <button type="submit" className="creative-btn creative-btn--sliding" style={{ 
+                  background: 'var(--primary-orange)', 
+                  color: 'white', 
+                  padding: '1rem 3rem',
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 700
+                }}>
+                  {upsertMutation.isPending ? 'SAVING...' : (editingRecord ? 'UPDATE TESTIMONIAL' : 'CREATE TESTIMONIAL')}
+                </button>
+              </div>
             </form>
           </div>
         </div>

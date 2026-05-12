@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { siteContentService } from '@/api/services/cmsService';
-import { Save, Loader2, Info, Phone, Share2, CheckCircle2 } from 'lucide-react';
+import type { SiteContent } from '@/types/cms.types';
+import { Save, Loader2, Phone, Share2, Building2 } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast/ToastProvider';
+import { motion, AnimatePresence } from 'framer-motion';
+
 const DEFAULT_SITE_CONTENT: Record<string, string> = {
   company_name: '',
   company_legal_name: '',
@@ -25,16 +29,16 @@ const DEFAULT_SITE_CONTENT: Record<string, string> = {
 
 const SiteContentManager = () => {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'profile' | 'contact' | 'social'>('profile');
 
-  const { data: content, isLoading } = useQuery({
+  const { data: content = [], isLoading } = useQuery<SiteContent[]>({
     queryKey: [QUERY_KEYS.SITE_CONTENT],
     queryFn: siteContentService.fetchAll,
   });
 
   const [formState, setFormState] = useState<Record<string, string>>(DEFAULT_SITE_CONTENT);
   const [savingSection, setSavingSection] = useState(false);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
     const state: Record<string, string> = { ...DEFAULT_SITE_CONTENT };
@@ -70,207 +74,167 @@ const SiteContentManager = () => {
 
   const handleSaveSection = async () => {
     setSavingSection(true);
-    setSuccessMsg(null);
     try {
       const keys = getTabKeys(activeTab);
-      // Only upsert modified keys to avoid redundant writes
       const promises = keys.map((key) => {
         const val = formState[key] || '';
         return siteContentService.update(key, val);
       });
       await Promise.all(promises);
       await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITE_CONTENT] });
-      
-      setSuccessMsg(`${activeTab === 'profile' ? 'Company Profile' : activeTab === 'contact' ? 'Contact Details' : 'Social Links'} updated successfully and synced with the live site!`);
-      setTimeout(() => setSuccessMsg(null), 3500);
+      showToast('Site settings updated and synced!', 'success');
     } catch (err) {
-      console.error('Error saving section:', err);
+      showToast('Failed to save settings.', 'error');
     } finally {
       setSavingSection(false);
     }
   };
 
-  if (isLoading && (!content || content.length === 0)) {
+  if (isLoading && content.length === 0) {
     return (
       <div className="flex-center" style={{ height: '50vh' }}>
-        <Loader2 className="spin" size={32} />
+        <Loader2 className="spin" size={32} color="var(--primary-orange)" />
       </div>
     );
   }
 
-  const renderField = (key: string, label: string, type: 'text' | 'textarea' = 'text') => {
+  const renderField = (key: string, label: string, type: 'text' | 'textarea' = 'text', Icon?: React.ComponentType<{ size?: number }>) => {
     const dbVal = content?.find((item) => item.key === key)?.value;
     const isDirty = formState[key] !== (dbVal !== undefined ? dbVal : DEFAULT_SITE_CONTENT[key]);
 
     return (
-      <div className="admin-content-field" key={key} style={{ marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-          <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--dark-text)' }}>
-            {label} {isDirty && <span style={{ color: 'var(--primary-orange)', fontSize: '0.75rem', fontWeight: 600, marginLeft: '0.5rem' }}>(edited)</span>}
-          </label>
+      <div className={`form-group ${isDirty ? 'is-dirty' : ''}`} key={key}>
+        <div className="flex-between">
+          <label>{label}</label>
+          {isDirty && <span className="dirty-indicator">MODIFIED</span>}
         </div>
-        {type === 'textarea' ? (
-          <textarea
-            value={formState[key] || ''}
-            onChange={(e) => handleChange(key, e.target.value)}
-            className="admin-input"
-            rows={4}
-            style={{ width: '100%', resize: 'vertical', background: 'white', border: isDirty ? '1px solid var(--primary-orange)' : '1px solid rgba(0,0,0,0.1)' }}
-          />
-        ) : (
-          <input
-            type="text"
-            value={formState[key] || ''}
-            onChange={(e) => handleChange(key, e.target.value)}
-            className="admin-input"
-            style={{ width: '100%', background: 'white', border: isDirty ? '1px solid var(--primary-orange)' : '1px solid rgba(0,0,0,0.1)' }}
-          />
-        )}
+        <div className="input-with-icon">
+           {Icon && <div className="input-icon"><Icon size={16} /></div>}
+           {type === 'textarea' ? (
+            <textarea
+              value={formState[key] || ''}
+              onChange={(e) => handleChange(key, e.target.value)}
+              className="admin-input"
+              rows={3}
+              style={{ resize: 'vertical' }}
+            />
+          ) : (
+            <input
+              type="text"
+              value={formState[key] || ''}
+              onChange={(e) => handleChange(key, e.target.value)}
+              className="admin-input"
+            />
+          )}
+        </div>
       </div>
     );
   };
 
   return (
-    <div>
-      {/* Toast Notification */}
-      {successMsg && (
-        <div style={{
-          position: 'fixed',
-          top: '2rem',
-          right: '2rem',
-          background: 'var(--dark-navy)',
-          borderLeft: '4px solid #10b981',
-          color: 'white',
-          padding: '1rem 1.5rem',
-          borderRadius: 'var(--radius-md)',
-          boxShadow: 'var(--shadow-lg)',
-          zIndex: 1100,
-          fontWeight: 600,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          fontSize: '0.9rem',
-          transition: 'all 0.3s ease',
-        }}>
-          <CheckCircle2 size={18} style={{ color: '#10b981' }} />
-          <span>{successMsg}</span>
+    <div className="admin-content-area">
+      <div className="admin-header-row">
+        <div>
+          <h1 className="admin-page__title">Global Settings</h1>
+          <p className="admin-page__subtitle">Control company identifiers, addresses, and social connectivity</p>
         </div>
-      )}
+      </div>
 
-      <h1 className="admin-page__title">Site Content Manager</h1>
-
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '1rem' }}>
+      <div className="admin-tabs">
         <button
           onClick={() => setActiveTab('profile')}
-          className="btn"
-          style={{
-            background: activeTab === 'profile' ? 'var(--primary-blue)' : 'transparent',
-            color: activeTab === 'profile' ? 'white' : 'var(--dark-text)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.5rem 1rem',
-          }}
+          className={`admin-tab ${activeTab === 'profile' ? 'active' : ''}`}
         >
-          <Info size={16} /> Company Profile
+          <Building2 size={18} /> <span>Company Profile</span>
         </button>
         <button
           onClick={() => setActiveTab('contact')}
-          className="btn"
-          style={{
-            background: activeTab === 'contact' ? 'var(--primary-blue)' : 'transparent',
-            color: activeTab === 'contact' ? 'white' : 'var(--dark-text)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.5rem 1rem',
-          }}
+          className={`admin-tab ${activeTab === 'contact' ? 'active' : ''}`}
         >
-          <Phone size={16} /> Contact Details
+          <Phone size={18} /> <span>Contact Channels</span>
         </button>
         <button
           onClick={() => setActiveTab('social')}
-          className="btn"
-          style={{
-            background: activeTab === 'social' ? 'var(--primary-blue)' : 'transparent',
-            color: activeTab === 'social' ? 'white' : 'var(--dark-text)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.5rem 1rem',
-          }}
+          className={`admin-tab ${activeTab === 'social' ? 'active' : ''}`}
         >
-          <Share2 size={16} /> Social & Portals
+          <Share2 size={18} /> <span>Social & Links</span>
         </button>
       </div>
 
-      <div style={{ background: 'var(--bg-light)', padding: '2rem', borderRadius: 'var(--radius-lg)' }}>
-        {activeTab === 'profile' && (
-          <div>
-            <h3 style={{ marginBottom: '1.5rem', color: 'var(--dark-navy)' }}>General Profile Settings</h3>
-            {renderField('company_name', 'Company Name')}
-            {renderField('company_legal_name', 'Legal Entity Name')}
-            {renderField('company_tagline', 'Tagline', 'textarea')}
-            {renderField('company_motto', 'Motto / Theme Statement')}
-            {renderField('company_vision', 'Vision Statement', 'textarea')}
-            {renderField('company_mission', 'Mission Statement', 'textarea')}
-          </div>
-        )}
-
-        {activeTab === 'contact' && (
-          <div>
-            <h3 style={{ marginBottom: '1.5rem', color: 'var(--dark-navy)' }}>Corporate Offices & Communication</h3>
-            {renderField('contact_phone', 'Primary Contact Phone Number')}
-            {renderField('contact_email', 'Sales/Corporate Email Address')}
-            <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.05)', margin: '2rem 0' }} />
-            <h4 style={{ marginBottom: '1rem', color: 'var(--dark-navy)' }}>US Corporate Office</h4>
-            {renderField('office_us_label', 'Office Name (Label)')}
-            {renderField('office_us_address', 'Full Postal Address', 'textarea')}
-            <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.05)', margin: '2rem 0' }} />
-            <h4 style={{ marginBottom: '1rem', color: 'var(--dark-navy)' }}>India Corporate Office</h4>
-            {renderField('office_india_label', 'Office Name (Label)')}
-            {renderField('office_india_address', 'Full Postal Address', 'textarea')}
-          </div>
-        )}
-
-        {activeTab === 'social' && (
-          <div>
-            <h3 style={{ marginBottom: '1.5rem', color: 'var(--dark-navy)' }}>Social Links & Integrations</h3>
-            {renderField('social_linkedin', 'LinkedIn Handle')}
-            {renderField('social_facebook', 'Facebook Page URL')}
-            {renderField('social_instagram', 'Instagram Profile')}
-            {renderField('social_twitter', 'Twitter Account')}
-            <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.05)', margin: '2rem 0' }} />
-            <h4 style={{ marginBottom: '1rem', color: 'var(--dark-navy)' }}>Talent Acquisition / Portals</h4>
-            {renderField('job_portal_url', 'Candidate Application Portal URL')}
-          </div>
-        )}
-
-        {/* Unified Save Button at the Bottom of the Section */}
-        <div style={{ marginTop: '2.5rem', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
-          <button
+      <div className="admin-card-v2 slide-in-up" style={{ minHeight: '400px' }}>
+        <div className="admin-card-v2__header">
+           <h3 style={{ textTransform: 'capitalize' }}>{activeTab} Configuration</h3>
+           <button
             onClick={handleSaveSection}
             disabled={savingSection || !isTabDirty()}
-            style={{
-              padding: '0.75rem 2rem',
-              fontSize: '0.9rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              background: isTabDirty() ? '#EE4F29' : 'rgba(0, 0, 0, 0.1)',
-              color: '#FFFFFF',
-              fontWeight: 600,
-              border: 'none',
-              borderRadius: 'var(--radius-md)',
-              opacity: isTabDirty() ? 1 : 0.45,
-              cursor: isTabDirty() ? 'pointer' : 'not-allowed',
-              boxShadow: isTabDirty() ? 'var(--shadow-md)' : 'none',
-              transition: 'all 0.3s ease',
+            className="creative-btn creative-btn--sliding parallelogram"
+            style={{ 
+              background: isTabDirty() ? 'var(--primary-orange)' : 'var(--bg-light)', 
+              color: isTabDirty() ? 'white' : 'var(--muted-text)',
+              padding: '0.6rem 2rem',
+              fontSize: '0.85rem'
             }}
           >
             {savingSection ? <Loader2 className="spin" size={16} /> : <Save size={16} />}
-            {savingSection ? 'Saving Changes...' : 'Save Changes'}
+            <span>{savingSection ? 'SAVING...' : 'SAVE CHANGES'}</span>
           </button>
+        </div>
+        <div className="admin-card-v2__body">
+           <AnimatePresence mode="wait">
+             <motion.div
+               key={activeTab}
+               initial={{ opacity: 0, x: 20 }}
+               animate={{ opacity: 1, x: 0 }}
+               exit={{ opacity: 0, x: -20 }}
+               transition={{ duration: 0.2 }}
+               className="modal-form"
+               style={{ padding: 0 }}
+             >
+                {activeTab === 'profile' && (
+                  <div className="form-grid-2">
+                    {renderField('company_name', 'Brand Name')}
+                    {renderField('company_legal_name', 'Legal Entity Name')}
+                    <div style={{ gridColumn: 'span 2' }}>
+                      {renderField('company_tagline', 'Strategic Tagline', 'textarea')}
+                    </div>
+                    {renderField('company_motto', 'Corporate Motto')}
+                    <div style={{ gridColumn: 'span 2' }}>
+                      {renderField('company_vision', 'Vision Statement', 'textarea')}
+                    </div>
+                    <div style={{ gridColumn: 'span 2' }}>
+                      {renderField('company_mission', 'Mission Statement', 'textarea')}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'contact' && (
+                  <div className="form-grid-2">
+                    {renderField('contact_phone', 'Primary Contact Number')}
+                    {renderField('contact_email', 'Sales / Support Email')}
+                    <div style={{ gridColumn: 'span 2' }}>
+                       <div className="form-separator">Corporate Offices</div>
+                    </div>
+                    {renderField('office_us_label', 'US Office Label')}
+                    {renderField('office_us_address', 'US Office Address', 'textarea')}
+                    {renderField('office_india_label', 'India Office Label')}
+                    {renderField('office_india_address', 'India Office Address', 'textarea')}
+                  </div>
+                )}
+
+                {activeTab === 'social' && (
+                  <div className="form-grid-2">
+                    {renderField('social_linkedin', 'LinkedIn Profile URL')}
+                    {renderField('social_facebook', 'Facebook Page URL')}
+                    {renderField('social_instagram', 'Instagram Account')}
+                    {renderField('social_twitter', 'Twitter / X Handle')}
+                    <div style={{ gridColumn: 'span 2' }}>
+                       <div className="form-separator">External Portals</div>
+                    </div>
+                    {renderField('job_portal_url', 'Careers/Job Portal URL')}
+                  </div>
+                )}
+             </motion.div>
+           </AnimatePresence>
         </div>
       </div>
     </div>

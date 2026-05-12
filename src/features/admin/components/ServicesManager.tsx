@@ -4,9 +4,14 @@ import { QUERY_KEYS } from '@/constants/queryKeys';
 import { servicesService } from '@/api/services/cmsService';
 import type { ServiceRecord, ServiceCategoryRecord } from '@/types/cms.types';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X, FolderKanban, Cpu } from 'lucide-react';
+import { AdminTable } from '@/components/common/AdminTable/AdminTable';
+import { useToast } from '@/components/ui/Toast/ToastProvider';
+import { useConfirm } from '@/components/ui/Modal/ConfirmProvider';
 
 const ServicesManager = () => {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
+  const confirm = useConfirm();
   const [activeSubTab, setActiveSubTab] = useState<'services' | 'categories'>('services');
 
   /* Modals */
@@ -48,14 +53,17 @@ const ServicesManager = () => {
     mutationFn: (rec: Partial<ServiceRecord>) => servicesService.upsertService(rec),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SERVICES] });
+      showToast('Service saved successfully!', 'success');
       closeServiceModal();
     },
+    onError: () => showToast('Failed to save service.', 'error'),
   });
 
   const deleteServiceMutation = useMutation({
     mutationFn: (id: string) => servicesService.deleteService(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SERVICES] });
+      showToast('Service deleted.', 'info');
     },
   });
 
@@ -63,6 +71,7 @@ const ServicesManager = () => {
     mutationFn: (rec: Partial<ServiceCategoryRecord>) => servicesService.upsertCategory(rec),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SERVICE_CATEGORIES] });
+      showToast('Category saved!', 'success');
       closeCategoryModal();
     },
   });
@@ -71,6 +80,7 @@ const ServicesManager = () => {
     mutationFn: (id: string) => servicesService.deleteCategory(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SERVICE_CATEGORIES] });
+      showToast('Category removed.', 'info');
     },
   });
 
@@ -131,7 +141,13 @@ const ServicesManager = () => {
   };
 
   const handleDeleteService = async (id: string) => {
-    if (confirm('Are you sure you want to delete this service?')) {
+    const isConfirmed = await confirm({
+      title: 'Delete Service',
+      message: 'Are you sure you want to delete this service? This action is permanent and cannot be undone.',
+      type: 'danger',
+      confirmText: 'Delete'
+    });
+    if (isConfirmed) {
       await deleteServiceMutation.mutateAsync(id);
     }
   };
@@ -174,208 +190,262 @@ const ServicesManager = () => {
   };
 
   const handleDeleteCategory = async (id: string) => {
-    if (confirm('Deleting a category will delete all nested services! Proceed?')) {
+    const isConfirmed = await confirm({
+      title: 'Delete Category',
+      message: 'Deleting a category will permanently delete all nested services! Are you absolutely sure you want to proceed?',
+      type: 'danger',
+      confirmText: 'Delete Category'
+    });
+    if (isConfirmed) {
       await deleteCategoryMutation.mutateAsync(id);
     }
   };
 
+  const serviceColumns = [
+    {
+      header: 'Title',
+      accessor: 'title' as keyof ServiceRecord,
+      sortable: true,
+      filterable: true,
+    },
+    {
+      header: 'Category',
+      accessor: (s: ServiceRecord) => {
+        const cat = categories.find(c => c.id === s.category_id);
+        return <span className="admin-tag" style={{ background: 'var(--admin-accent-soft)', color: 'var(--primary-orange)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 600, fontSize: '0.75rem' }}>{cat?.title || s.category_id}</span>;
+      },
+      sortable: true,
+      filterable: true,
+    },
+    {
+      header: 'Slug',
+      accessor: 'slug' as keyof ServiceRecord,
+      sortable: true,
+      width: '150px'
+    },
+    {
+      header: 'Order',
+      accessor: 'sort_order' as keyof ServiceRecord,
+      sortable: true,
+      width: '80px'
+    },
+    {
+      header: 'Status',
+      accessor: (s: ServiceRecord) => (
+        <span className={`status-badge ${s.is_active ? 'status-badge--active' : 'status-badge--inactive'}`}>
+          {s.is_active ? 'Active' : 'Inactive'}
+        </span>
+      ),
+      width: '100px'
+    }
+  ];
+
+  const categoryColumns = [
+    {
+      header: 'Identifier',
+      accessor: 'id' as keyof ServiceCategoryRecord,
+      sortable: true,
+      filterable: true,
+    },
+    {
+      header: 'Title',
+      accessor: 'title' as keyof ServiceCategoryRecord,
+      sortable: true,
+      filterable: true,
+    },
+    {
+      header: 'Order',
+      accessor: 'sort_order' as keyof ServiceCategoryRecord,
+      sortable: true,
+      width: '100px'
+    }
+  ];
+
   if ((loadingCats && categories.length === 0) || (loadingServices && services.length === 0)) {
     return (
       <div className="flex-center" style={{ height: '50vh' }}>
-        <Loader2 className="spin" size={32} />
+        <Loader2 className="spin" size={32} color="var(--primary-orange)" />
       </div>
     );
   }
 
   return (
-    <div>
-      <h1 className="admin-page__title">Expertise & Services CMS</h1>
+    <div className="admin-content-area">
+      <div className="admin-header-row">
+        <div>
+          <h1 className="admin-page__title">Expertise & Services</h1>
+          <p className="admin-page__subtitle">Manage your service offerings and logical groupings</p>
+        </div>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button 
+            onClick={activeSubTab === 'services' ? openCreateService : openCreateCategory} 
+            className="creative-btn creative-btn--sliding parallelogram" 
+            style={{ 
+              background: 'var(--primary-orange)', 
+              color: 'white', 
+              padding: '0.8rem 2rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              fontWeight: 700
+            }}
+          >
+            <Plus size={18} /> <span>{activeSubTab === 'services' ? 'ADD SERVICE' : 'ADD CATEGORY'}</span>
+          </button>
+        </div>
+      </div>
 
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '1rem' }}>
+      <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '2rem' }}>
         <button
           onClick={() => setActiveSubTab('services')}
-          className="btn"
           style={{
-            background: activeSubTab === 'services' ? 'var(--primary-blue)' : 'transparent',
-            color: activeSubTab === 'services' ? 'white' : 'var(--dark-text)',
+            padding: '0.75rem 1.5rem',
+            borderRadius: 'var(--radius-md)',
+            background: activeSubTab === 'services' ? 'var(--dark-navy)' : 'white',
+            color: activeSubTab === 'services' ? 'white' : 'var(--dark-navy)',
+            fontWeight: 700,
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
-            padding: '0.5rem 1rem',
+            boxShadow: activeSubTab === 'services' ? 'var(--shadow-md)' : 'none',
+            border: '1px solid rgba(0,0,0,0.05)'
           }}
         >
-          <Cpu size={16} /> Services List
+          <Cpu size={18} /> Services
         </button>
         <button
           onClick={() => setActiveSubTab('categories')}
-          className="btn"
           style={{
-            background: activeSubTab === 'categories' ? 'var(--primary-blue)' : 'transparent',
-            color: activeSubTab === 'categories' ? 'white' : 'var(--dark-text)',
+            padding: '0.75rem 1.5rem',
+            borderRadius: 'var(--radius-md)',
+            background: activeSubTab === 'categories' ? 'var(--dark-navy)' : 'white',
+            color: activeSubTab === 'categories' ? 'white' : 'var(--dark-navy)',
+            fontWeight: 700,
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
-            padding: '0.5rem 1rem',
+            boxShadow: activeSubTab === 'categories' ? 'var(--shadow-md)' : 'none',
+            border: '1px solid rgba(0,0,0,0.05)'
           }}
         >
-          <FolderKanban size={16} /> Manage Categories
+          <FolderKanban size={18} /> Categories
         </button>
       </div>
 
-      {activeSubTab === 'services' ? (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h3 style={{ margin: 0, color: 'var(--dark-navy)' }}>Active Services</h3>
-            <button onClick={openCreateService} className="btn btn--orange" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Plus size={16} /> Add New Service
-            </button>
-          </div>
-
-          <div style={{ overflowX: 'auto', background: 'white', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid rgba(0,0,0,0.05)' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
-              <thead>
-                <tr style={{ background: 'var(--bg-light)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
-                  <th style={{ padding: '1rem 1.5rem' }}>Service Info</th>
-                  <th style={{ padding: '1rem 1.5rem' }}>Slug</th>
-                  <th style={{ padding: '1rem 1.5rem' }}>Category</th>
-                  <th style={{ padding: '1rem 1.5rem' }}>Sort</th>
-                  <th style={{ padding: '1rem 1.5rem' }}>Features/Tech</th>
-                  <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {services.map((service) => {
-                  const cat = categories.find((c) => c.id === service.category_id);
-                  return (
-                    <tr key={service.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.05)', opacity: service.is_active ? 1 : 0.6 }}>
-                      <td style={{ padding: '1rem 1.5rem', fontWeight: 600, color: 'var(--dark-navy)' }}>{service.title}</td>
-                      <td style={{ padding: '1rem 1.5rem', color: 'var(--muted-text)', fontFamily: 'monospace' }}>{service.slug}</td>
-                      <td style={{ padding: '1rem 1.5rem' }}>
-                        <span style={{ padding: '0.15rem 0.5rem', background: 'rgba(1,14,208,0.05)', color: 'var(--primary-blue)', borderRadius: 'var(--radius-sm)', fontWeight: 600, fontSize: '0.75rem' }}>
-                          {cat?.title || service.category_id}
-                        </span>
-                      </td>
-                      <td style={{ padding: '1rem 1.5rem' }}>{service.sort_order}</td>
-                      <td style={{ padding: '1rem 1.5rem' }}>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-                          <span style={{ fontSize: '0.7rem', background: 'var(--bg-light)', padding: '0.1rem 0.4rem', borderRadius: 'var(--radius-xs)', color: 'var(--dark-text)' }}>
-                            {service.features.length} Features
-                          </span>
-                          <span style={{ fontSize: '0.7rem', background: 'var(--bg-light)', padding: '0.1rem 0.4rem', borderRadius: 'var(--radius-xs)', color: 'var(--dark-text)' }}>
-                            {service.technologies.length} Techs
-                          </span>
-                        </div>
-                      </td>
-                      <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                        <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'flex-end' }}>
-                          <button onClick={() => openEditService(service)} className="admin-icon-btn"><Edit2 size={14} /></button>
-                          <button onClick={() => handleToggleServiceActive(service)} className="admin-icon-btn">{service.is_active ? <Eye size={14} /> : <EyeOff size={14} />}</button>
-                          <button onClick={() => handleDeleteService(service.id)} className="admin-icon-btn admin-icon-btn--danger"><Trash2 size={14} /></button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ) : (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h3 style={{ margin: 0, color: 'var(--dark-navy)' }}>Group Categories</h3>
-            <button onClick={openCreateCategory} className="btn btn--orange" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Plus size={16} /> Add Category Group
-            </button>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-            {categories.map((cat) => {
-              const count = services.filter((s) => s.category_id === cat.id).length;
-              return (
-                <div key={cat.id} style={{ background: 'white', padding: '1.5rem', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <h4 style={{ margin: '0 0 0.25rem 0', fontWeight: 700, color: 'var(--dark-navy)' }}>{cat.title}</h4>
-                    <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted-text)', fontFamily: 'monospace' }}>ID: {cat.id} | {count} nested services</p>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.25rem' }}>
-                    <button onClick={() => openEditCategory(cat)} className="admin-icon-btn"><Edit2 size={14} /></button>
-                    <button onClick={() => handleDeleteCategory(cat.id)} className="admin-icon-btn admin-icon-btn--danger"><Trash2 size={14} /></button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <div>
+        {activeSubTab === 'services' ? (
+          <AdminTable
+            data={services}
+            columns={serviceColumns}
+            title="Active Services"
+            actions={(service) => (
+              <div className="table-actions">
+                <button onClick={() => openEditService(service)} className="admin-icon-btn" title="Edit">
+                  <Edit2 size={16} />
+                </button>
+                <button onClick={() => handleToggleServiceActive(service)} className="admin-icon-btn" title={service.is_active ? 'Deactivate' : 'Activate'}>
+                  {service.is_active ? <Eye size={16} /> : <EyeOff size={16} />}
+                </button>
+                <button onClick={() => handleDeleteService(service.id)} className="admin-icon-btn admin-icon-btn--danger" title="Delete">
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            )}
+          />
+        ) : (
+          <AdminTable
+            data={categories}
+            columns={categoryColumns}
+            title="Service Groups"
+            actions={(cat) => (
+              <div className="table-actions">
+                <button onClick={() => openEditCategory(cat)} className="admin-icon-btn" title="Edit">
+                  <Edit2 size={16} />
+                </button>
+                <button onClick={() => handleDeleteCategory(cat.id)} className="admin-icon-btn admin-icon-btn--danger" title="Delete">
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            )}
+          />
+        )}
+      </div>
 
       {/* SERVICE MODAL */}
       {serviceModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem' }}>
-          <div style={{ background: 'white', padding: '2rem', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '650px', maxHeight: '90vh', overflowY: 'auto', boxShadow: 'var(--shadow-lg)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 style={{ margin: 0, color: 'var(--dark-navy)' }}>{editingService ? 'Edit Service' : 'Add New Service'}</h3>
-              <button onClick={closeServiceModal} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+        <div className="modal-overlay">
+          <div className="modal-card slide-in-up" style={{ maxWidth: '800px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title">{editingService ? 'Edit Service' : 'New Service'}</h3>
+              <button onClick={closeServiceModal} className="modal-close"><X size={24} /></button>
             </div>
 
-            <form onSubmit={handleServiceSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Service Title</label>
-                  <input type="text" required placeholder="e.g. Application Modernization" value={title} onChange={(e) => setTitle(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+            <form onSubmit={handleServiceSubmit} className="modal-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Title</label>
+                  <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} className="admin-input" />
                 </div>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Slug (URL path)</label>
-                  <input type="text" placeholder="Auto-generated if empty" value={slug} onChange={(e) => setSlug(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+                <div className="form-group">
+                  <label>Slug</label>
+                  <input type="text" placeholder="URL-friendly name" value={slug} onChange={(e) => setSlug(e.target.value)} className="admin-input" />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Category Group</label>
-                  <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="admin-select" style={{ width: '100%' }}>
+              <div className="form-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+                <div className="form-group">
+                  <label>Category</label>
+                  <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="admin-input">
                     {categories.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
                   </select>
                 </div>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Lucide Icon</label>
-                  <input type="text" placeholder="e.g. Settings, Brain, RefreshCw" value={icon} onChange={(e) => setIcon(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+                <div className="form-group">
+                  <label>Icon (Lucide name)</label>
+                  <input type="text" value={icon} onChange={(e) => setIcon(e.target.value)} className="admin-input" />
                 </div>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Sort Order</label>
-                  <input type="number" required value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="admin-input" style={{ width: '100%' }} />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Short Description</label>
-                <textarea required placeholder="Write a short teaser snippet..." value={shortDesc} onChange={(e) => setShortDesc(e.target.value)} className="admin-input" rows={2} style={{ width: '100%', resize: 'none' }} />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Full Deep Description (Tanglish/English)</label>
-                <textarea required placeholder="Write the full service detail content..." value={fullDesc} onChange={(e) => setFullDesc(e.target.value)} className="admin-input" rows={4} style={{ width: '100%', resize: 'none' }} />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Features (comma separated)</label>
-                  <input type="text" placeholder="e.g. Consulting, CI/CD, Auditing" value={features} onChange={(e) => setFeatures(e.target.value)} className="admin-input" style={{ width: '100%' }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Technologies (comma separated)</label>
-                  <input type="text" placeholder="e.g. Azure, Docker, AWS (optional)" value={technologies} onChange={(e) => setTechnologies(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+                <div className="form-group">
+                  <label>Sort Order</label>
+                  <input type="number" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="admin-input" />
                 </div>
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-                Is Active (Display on site)
-              </label>
+              <div className="form-group">
+                <label>Short Snippet</label>
+                <textarea required rows={2} value={shortDesc} onChange={(e) => setShortDesc(e.target.value)} className="admin-input" style={{ resize: 'none' }} />
+              </div>
 
-              <button type="submit" className="btn btn--orange" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}>
-                {serviceMutation.isPending ? 'Saving...' : 'Save Service'}
-              </button>
+              <div className="form-group">
+                <label>Full Content</label>
+                <textarea required rows={5} value={fullDesc} onChange={(e) => setFullDesc(e.target.value)} className="admin-input" style={{ resize: 'none' }} />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Features (comma separated)</label>
+                  <input type="text" value={features} onChange={(e) => setFeatures(e.target.value)} className="admin-input" />
+                </div>
+                <div className="form-group">
+                  <label>Technologies (comma separated)</label>
+                  <input type="text" value={technologies} onChange={(e) => setTechnologies(e.target.value)} className="admin-input" />
+                </div>
+              </div>
+
+              <div className="flex-between">
+                <label className="toggle-switch">
+                  <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Active</span>
+                </label>
+                <button type="submit" className="creative-btn creative-btn--sliding" style={{ 
+                  background: 'var(--primary-orange)', 
+                  color: 'white', 
+                  padding: '1rem 4rem',
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 700
+                }}>
+                  {serviceMutation.isPending ? 'SAVING...' : 'SAVE SERVICE'}
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -383,31 +453,38 @@ const ServicesManager = () => {
 
       {/* CATEGORY MODAL */}
       {categoryModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <div style={{ background: 'white', padding: '2rem', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '450px', boxShadow: 'var(--shadow-lg)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 style={{ margin: 0, color: 'var(--dark-navy)' }}>{editingCategory ? 'Edit Category' : 'Add Category Group'}</h3>
-              <button onClick={closeCategoryModal} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+        <div className="modal-overlay">
+          <div className="modal-card slide-in-up">
+            <div className="modal-header">
+              <h3 className="modal-title">{editingCategory ? 'Edit Category' : 'New Category'}</h3>
+              <button onClick={closeCategoryModal} className="modal-close"><X size={24} /></button>
             </div>
 
-            <form onSubmit={handleCategorySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Category Identifier ID (No spaces)</label>
-                <input type="text" required placeholder="e.g. cloud-native-solutions" disabled={!!editingCategory} value={catId} onChange={(e) => setCatId(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+            <form onSubmit={handleCategorySubmit} className="modal-form">
+              <div className="form-group">
+                <label>Identifier (ID)</label>
+                <input type="text" required disabled={!!editingCategory} value={catId} onChange={(e) => setCatId(e.target.value)} className="admin-input" />
               </div>
 
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Display Title Name</label>
-                <input type="text" required placeholder="e.g. Cloud Services" value={catTitle} onChange={(e) => setCatTitle(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+              <div className="form-group">
+                <label>Display Name</label>
+                <input type="text" required value={catTitle} onChange={(e) => setCatTitle(e.target.value)} className="admin-input" />
               </div>
 
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Sort Order</label>
-                <input type="number" required value={catSort} onChange={(e) => setCatSort(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+              <div className="form-group">
+                <label>Display Order</label>
+                <input type="number" value={catSort} onChange={(e) => setCatSort(e.target.value)} className="admin-input" />
               </div>
 
-              <button type="submit" className="btn btn--orange" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}>
-                {categoryMutation.isPending ? 'Saving...' : 'Save Category'}
+              <button type="submit" className="creative-btn creative-btn--sliding" style={{ 
+                background: 'var(--primary-orange)', 
+                color: 'white', 
+                width: '100%',
+                padding: '1rem',
+                borderRadius: 'var(--radius-md)',
+                fontWeight: 700
+              }}>
+                {categoryMutation.isPending ? 'SAVING...' : 'SAVE CATEGORY'}
               </button>
             </form>
           </div>

@@ -3,11 +3,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { cultureService } from '@/api/services/cmsService';
 import type { CultureHighlightRecord } from '@/types/cms.types';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X, Heart } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X, Heart, Table as TableIcon, LayoutGrid } from 'lucide-react';
+import { AdminTable } from '@/components/common/AdminTable/AdminTable';
+import { useToast } from '@/components/ui/Toast/ToastProvider';
+import { useConfirm } from '@/components/ui/Modal/ConfirmProvider';
 
 const CultureManager = () => {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
+  const confirm = useConfirm();
   const [modalOpen, setModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [editingRecord, setEditingRecord] = useState<CultureHighlightRecord | null>(null);
 
   /* Form Fields */
@@ -26,14 +32,17 @@ const CultureManager = () => {
     mutationFn: (rec: Partial<CultureHighlightRecord>) => cultureService.upsert(rec),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CULTURE_HIGHLIGHTS] });
+      showToast('Culture card saved!', 'success');
       closeModal();
     },
+    onError: () => showToast('Failed to save highlight.', 'error'),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => cultureService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CULTURE_HIGHLIGHTS] });
+      showToast('Culture card removed.', 'info');
     },
   });
 
@@ -78,7 +87,13 @@ const CultureManager = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this highlight?')) {
+    const isConfirmed = await confirm({
+      title: 'Delete Highlight',
+      message: 'Are you sure you want to delete this culture highlight? This action is permanent and cannot be undone.',
+      type: 'danger',
+      confirmText: 'Delete'
+    });
+    if (isConfirmed) {
       await deleteMutation.mutateAsync(id);
     }
   };
@@ -87,110 +102,166 @@ const CultureManager = () => {
     await upsertMutation.mutateAsync({ ...rec, is_active: !rec.is_active });
   };
 
+  const columns = [
+    {
+      header: 'Title',
+      accessor: 'title' as keyof CultureHighlightRecord,
+      sortable: true,
+      filterable: true,
+    },
+    {
+      header: 'Description',
+      accessor: (rec: CultureHighlightRecord) => (
+        <span style={{ fontSize: '0.85rem', color: 'var(--muted-text)', display: 'block', maxWidth: '350px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {rec.description}
+        </span>
+      ),
+    },
+    {
+      header: 'Icon',
+      accessor: 'icon' as keyof CultureHighlightRecord,
+      width: '100px'
+    },
+    {
+      header: 'Order',
+      accessor: 'sort_order' as keyof CultureHighlightRecord,
+      sortable: true,
+      width: '80px'
+    },
+    {
+      header: 'Status',
+      accessor: (rec: CultureHighlightRecord) => (
+        <span className={`status-badge ${rec.is_active ? 'status-badge--active' : 'status-badge--inactive'}`}>
+          {rec.is_active ? 'Active' : 'Hidden'}
+        </span>
+      ),
+      width: '100px'
+    }
+  ];
+
   if (isLoading && items.length === 0) {
     return (
       <div className="flex-center" style={{ height: '50vh' }}>
-        <Loader2 className="spin" size={32} />
+        <Loader2 className="spin" size={32} color="var(--primary-orange)" />
       </div>
     );
   }
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h1 className="admin-page__title" style={{ margin: 0 }}>Culture & Careers CMS</h1>
-        <button onClick={openCreateModal} className="btn btn--orange" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Plus size={16} /> Add Culture Card
-        </button>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-        {items.map((item) => (
-          <div
-            key={item.id}
-            style={{
-              background: 'white',
-              padding: '1.5rem',
-              borderRadius: 'var(--radius-lg)',
-              boxShadow: 'var(--shadow-sm)',
-              border: '1px solid rgba(0,0,0,0.05)',
-              opacity: item.is_active ? 1 : 0.6,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-sm)', background: 'rgba(253,101,31,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Heart className="text-orange" size={20} />
-                </div>
-                <span style={{ fontSize: '0.75rem', background: 'var(--bg-light)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)', color: 'var(--muted-text)' }}>
-                  Order: {item.sort_order}
-                </span>
-              </div>
-              <h4 style={{ fontSize: '1.05rem', color: 'var(--dark-navy)', margin: '0 0 0.5rem 0', fontWeight: 700 }}>
-                {item.title}
-              </h4>
-              <p style={{ fontSize: '0.85rem', color: 'var(--muted-text)', lineHeight: 1.5, margin: 0 }}>
-                {item.description}
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '1rem' }}>
-              <button onClick={() => openEditModal(item)} className="admin-icon-btn" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
-                <Edit2 size={14} /> Edit
-              </button>
-              <button onClick={() => handleToggleActive(item)} className="admin-icon-btn" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
-                {item.is_active ? <Eye size={14} /> : <EyeOff size={14} />} {item.is_active ? 'Hide' : 'Show'}
-              </button>
-              <button onClick={() => handleDelete(item.id)} className="admin-icon-btn admin-icon-btn--danger" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
-                <Trash2 size={14} /> Delete
-              </button>
-            </div>
+    <div className="admin-content-area">
+      <div className="admin-header-row">
+        <div>
+          <h1 className="admin-page__title">Culture Highlights</h1>
+          <p className="admin-page__subtitle">Manage the "Why Work With Us" section on the careers page</p>
+        </div>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <div className="admin-toggle-group">
+            <button className={`toggle-btn ${viewMode === 'table' ? 'active' : ''}`} onClick={() => setViewMode('table')}><TableIcon size={18} /></button>
+            <button className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')}><LayoutGrid size={18} /></button>
           </div>
-        ))}
+          <button onClick={openCreateModal} className="creative-btn creative-btn--sliding parallelogram" style={{ 
+            background: 'var(--primary-orange)', 
+            color: 'white', 
+            padding: '0.8rem 2rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            fontWeight: 700
+          }}>
+            <Plus size={18} /> <span>ADD HIGHLIGHT</span>
+          </button>
+        </div>
       </div>
 
-      {/* MODAL */}
+      {viewMode === 'table' ? (
+        <AdminTable
+          data={items}
+          columns={columns}
+          title="Culture Cards Inventory"
+          actions={(rec) => (
+            <div className="table-actions">
+              <button onClick={() => openEditModal(rec)} className="admin-icon-btn" title="Edit">
+                <Edit2 size={16} />
+              </button>
+              <button onClick={() => handleToggleActive(rec)} className="admin-icon-btn" title={rec.is_active ? 'Hide' : 'Show'}>
+                {rec.is_active ? <Eye size={16} /> : <EyeOff size={16} />}
+              </button>
+              <button onClick={() => handleDelete(rec.id)} className="admin-icon-btn admin-icon-btn--danger" title="Delete">
+                <Trash2 size={16} />
+              </button>
+            </div>
+          )}
+        />
+      ) : (
+        <div className="admin-card-grid slide-in-up">
+          {items.map((item) => (
+            <div key={item.id} className="modern-card" style={{ opacity: item.is_active ? 1 : 0.6, padding: '1.5rem' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+                 <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: 'var(--admin-accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-orange)' }}>
+                   <Heart size={20} />
+                 </div>
+                 <span className="admin-tag">#{item.sort_order}</span>
+               </div>
+               <h4 style={{ margin: '0 0 0.5rem', fontSize: '1.1rem', fontWeight: 700 }}>{item.title}</h4>
+               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--muted-text)', lineHeight: 1.6, flex: 1 }}>{item.description}</p>
+               <div className="modern-card__footer" style={{ borderTop: 'none', padding: 0 }}>
+                 <div className="table-actions" style={{ width: '100%', marginTop: '1.5rem' }}>
+                  <button onClick={() => openEditModal(item)} className="admin-icon-btn" style={{ flex: 1 }}><Edit2 size={14} /> Edit</button>
+                  <button onClick={() => handleDelete(item.id)} className="admin-icon-btn admin-icon-btn--danger"><Trash2 size={14} /></button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* MODAL FORM */}
       {modalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <div style={{ background: 'white', padding: '2rem', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '450px', boxShadow: 'var(--shadow-lg)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 style={{ margin: 0, color: 'var(--dark-navy)' }}>{editingRecord ? 'Edit Culture Card' : 'Add Culture Card'}</h3>
-              <button onClick={closeModal} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+        <div className="modal-overlay">
+          <div className="modal-card slide-in-up" style={{ maxWidth: '450px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title">{editingRecord ? 'Edit Highlight' : 'New Highlight'}</h3>
+              <button onClick={closeModal} className="modal-close"><X size={24} /></button>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Lucide Icon</label>
-                  <input type="text" required placeholder="e.g. MapPin, Coffee, Heart" value={icon} onChange={(e) => setIcon(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+            <form onSubmit={handleSubmit} className="modal-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Lucide Icon Name</label>
+                  <input type="text" required placeholder="e.g. Heart, Coffee" value={icon} onChange={(e) => setIcon(e.target.value)} className="admin-input" />
                 </div>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Sort Order</label>
-                  <input type="number" required value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+                <div className="form-group">
+                  <label>Sort Order</label>
+                  <input type="number" required value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="admin-input" />
                 </div>
               </div>
 
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Card Title</label>
-                <input type="text" required placeholder="e.g. Flexible Work" value={title} onChange={(e) => setTitle(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+              <div className="form-group">
+                <label>Highlight Title</label>
+                <input type="text" required placeholder="e.g. Work-Life Balance" value={title} onChange={(e) => setTitle(e.target.value)} className="admin-input" />
               </div>
 
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Card Description</label>
-                <textarea required placeholder="Write a short summary sentence..." value={description} onChange={(e) => setDescription(e.target.value)} className="admin-input" rows={3} style={{ width: '100%', resize: 'none' }} />
+              <div className="form-group">
+                <label>Description (Brief)</label>
+                <textarea required rows={3} placeholder="Summarize this culture point..." value={description} onChange={(e) => setDescription(e.target.value)} className="admin-input" style={{ resize: 'none' }} />
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-                Is Active (Display on site)
-              </label>
-
-              <button type="submit" className="btn btn--orange" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}>
-                {upsertMutation.isPending ? 'Saving...' : 'Save Culture Card'}
-              </button>
+              <div className="flex-between">
+                <label className="toggle-switch">
+                  <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Active</span>
+                </label>
+                <button type="submit" className="creative-btn creative-btn--sliding" style={{ 
+                  background: 'var(--primary-orange)', 
+                  color: 'white', 
+                  padding: '1rem 3rem',
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 700
+                }}>
+                  {upsertMutation.isPending ? 'SAVING...' : 'SAVE HIGHLIGHT'}
+                </button>
+              </div>
             </form>
           </div>
         </div>

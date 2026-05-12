@@ -12,7 +12,6 @@ import {
   mediaService,
 } from '@/api/services/cmsService';
 import {
-  SUPABASE_TABLES,
   IMAGE_CATEGORIES,
 } from '@/constants/appConstants';
 import { SERVICE_CATEGORIES as STATIC_SERVICE_CATEGORIES } from '@/features/services/data/servicesData';

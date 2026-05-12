@@ -29,8 +29,8 @@ export const useTextScramble = (options: UseTextScrambleOptions) => {
   } = options;
 
   const [displayText, setDisplayText] = useState('');
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const scramble = useCallback(() => {
     let iteration = 0;
@@ -53,7 +53,7 @@ export const useTextScramble = (options: UseTextScrambleOptions) => {
 
       if (iteration > totalIterations) {
         setDisplayText(text);
-        clearInterval(intervalRef.current);
+        if (intervalRef.current) clearInterval(intervalRef.current);
       }
     }, speed);
   }, [text, speed, cycles]);
@@ -73,8 +73,8 @@ export const useTextScramble = (options: UseTextScrambleOptions) => {
     timeoutRef.current = setTimeout(scramble, delay);
 
     return () => {
-      clearInterval(intervalRef.current);
-      clearTimeout(timeoutRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [trigger, scramble, delay, text]);
 

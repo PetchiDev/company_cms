@@ -1,0 +1,254 @@
+.admin-table-container {
+  background: var(--admin-card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.admin-table-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.admin-table-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--dark-navy);
+}
+
+.admin-table-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--bg-light);
+  border-radius: var(--radius-md);
+  padding: 0 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  min-width: 280px;
+}
+
+.admin-table-search:focus-within {
+  border-color: var(--primary-orange);
+  background: white;
+  box-shadow: 0 0 0 4px var(--admin-accent-soft);
+}
+
+.admin-table-search input {
+  background: transparent;
+  border: none !important;
+  outline: none !important;
+  padding: 0.75rem 0.5rem;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.admin-table-search svg {
+  color: var(--muted-text);
+}
+
+.admin-table-wrapper {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-table th {
+  padding: 1rem 1.5rem;
+  background: var(--bg-light);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+  vertical-align: top;
+}
+
+.th-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.th-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-text);
+  white-space: nowrap;
+}
+
+.th-label.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.th-label.sortable:hover {
+  color: var(--admin-accent);
+}
+
+.sort-icon {
+  display: flex;
+  opacity: 0.5;
+}
+
+.th-label.sortable:hover .sort-icon {
+  opacity: 1;
+}
+
+.column-filter {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.column-filter:focus {
+  border-color: var(--admin-accent);
+}
+
+.admin-table td {
+  padding: 1rem 1.5rem;
+  font-size: 0.9rem;
+  color: var(--dark-text);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.admin-table tr.clickable {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.admin-table tr.clickable:hover {
+  background: var(--bg-warm);
+}
+
+.empty-state {
+  padding: 4rem !important;
+  text-align: center;
+  color: var(--muted-text);
+  font-style: italic;
+}
+
+.admin-table-footer {
+  padding: 1rem 1.5rem;
+  background: var(--bg-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pagination-info {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted-text);
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.page-num {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.page-num.active {
+  background: var(--admin-accent);
+  color: white;
+}
+
+.page-num:not(.active):hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.pagination-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-btn:not(:disabled):hover {
+  border-color: var(--admin-accent);
+  color: var(--admin-accent);
+}
+
+/* Responsive Table */
+@media (max-width: 1024px) {
+  .admin-table th:not(:first-child):not(:last-child),
+  .admin-table td:not(:first-child):not(:last-child) {
+    display: none;
+  }
+}
+
+/* Expandable rows */
+.expand-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: transform 0.2s, background-color 0.2s;
+  color: var(--muted-text);
+}
+
+.expand-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--dark-navy);
+}
+
+.expand-btn.expanded {
+  transform: rotate(90deg);
+  color: var(--primary-orange);
+}
+
+.expandable-row td {
+  background-color: #fafbfc;
+  padding: 1.5rem !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}

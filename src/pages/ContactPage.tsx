@@ -5,7 +5,6 @@ import { useSiteContent } from '@/hooks/useCMS';
 import { BUDGET_RANGES } from '@/constants/appConstants';
 import { contactService } from '@/api/services/contactService';
 import type { ContactFormData } from '@/types/contact.types';
-import { fadeInUp, staggerContainer, staggerItem } from '@/animations/pageTransitions';
 
 const SocialIcon = ({ name }: { name: string }) => {
   const n = name.toLowerCase();

@@ -1,6 +1,9 @@
 /* ═══════════════════════════════════════════════════
    Kryptos InfoSys — Global Design System
    ═══════════════════════════════════════════════════ */
+@import './admin.css';
+@import './animations.css';
+@import './typography.css';
 
 /* ─── CSS Variables ─── */
 :root {
@@ -79,6 +82,14 @@
   --z-modal-backdrop: 400;
   --z-modal: 500;
   --z-toast: 600;
+
+  /* Admin Theme Extensions */
+  --admin-sidebar-width: 280px;
+  --admin-sidebar-collapsed: 80px;
+  --admin-bg: #f8fafc;
+  --admin-card-bg: #ffffff;
+  --admin-accent: var(--primary-orange);
+  --admin-accent-soft: rgba(238, 79, 41, 0.1);
 }
 
 /* ─── Reset & Base ─── */
@@ -240,6 +251,61 @@ select {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* ─── Creative Utilities ─── */
+.parallelogram {
+  clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
+}
+
+.parallelogram-reverse {
+  clip-path: polygon(0% 0%, 90% 0%, 100% 100%, 10% 100%);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+.creative-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.creative-btn--sliding::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: all 0.4s ease;
+}
+
+.creative-btn--sliding:hover::after {
+  left: 100%;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.slide-in-up {
+  animation: slideInUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes slideInRight {
+  0% { transform: translateX(30px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInUp {
+  0% { transform: translateY(30px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 
 /* ─── Scrollbar ─── */

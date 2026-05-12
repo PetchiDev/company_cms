@@ -2,6 +2,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppRouter from '@/routes/AppRouter';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 
+import { ToastProvider } from '@/components/ui/Toast/ToastProvider';
+import { ConfirmProvider } from '@/components/ui/Modal/ConfirmProvider';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -21,7 +24,11 @@ const AppContent = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AppContent />
+    <ToastProvider>
+      <ConfirmProvider>
+        <AppContent />
+      </ConfirmProvider>
+    </ToastProvider>
   </QueryClientProvider>
 );
 

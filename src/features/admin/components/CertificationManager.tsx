@@ -5,9 +5,14 @@ import { QUERY_KEYS } from '@/constants/queryKeys';
 import { certificationService } from '@/api/services/cmsService';
 import type { CertificationRecord } from '@/types/cms.types';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X } from 'lucide-react';
+import { AdminTable } from '@/components/common/AdminTable/AdminTable';
+import { useToast } from '@/components/ui/Toast/ToastProvider';
+import { useConfirm } from '@/components/ui/Modal/ConfirmProvider';
 
 const CertificationManager = () => {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
+  const confirm = useConfirm();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<CertificationRecord | null>(null);
 
@@ -26,15 +31,19 @@ const CertificationManager = () => {
     mutationFn: (record: Partial<CertificationRecord>) => certificationService.upsert(record),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CERTIFICATIONS] });
+      showToast(editingRecord ? 'Certification updated successfully!' : 'Certification created successfully!', 'success');
       closeModal();
     },
+    onError: () => showToast('Failed to save certification.', 'error'),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => certificationService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CERTIFICATIONS] });
+      showToast('Certification deleted.', 'info');
     },
+    onError: () => showToast('Failed to delete certification.', 'error'),
   });
 
   const openEditModal = (record: CertificationRecord) => {
@@ -75,7 +84,13 @@ const CertificationManager = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this certification?')) {
+    const isConfirmed = await confirm({
+      title: 'Delete Certification',
+      message: 'Are you sure you want to delete this certification? This action is permanent and cannot be undone.',
+      type: 'danger',
+      confirmText: 'Delete'
+    });
+    if (isConfirmed) {
       await deleteMutation.mutateAsync(id);
     }
   };
@@ -87,84 +102,106 @@ const CertificationManager = () => {
     });
   };
 
+  const columns = [
+    {
+      header: 'Logo',
+      accessor: (cert: CertificationRecord) => (
+        <div style={{ height: '40px', width: '80px', display: 'flex', alignItems: 'center', background: 'var(--bg-light)', borderRadius: 'var(--radius-sm)', padding: '0.25rem' }}>
+          <img src={cert.url || undefined} alt={cert.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+        </div>
+      ),
+      width: '120px'
+    },
+    {
+      header: 'Name',
+      accessor: 'name' as keyof CertificationRecord,
+      sortable: true,
+      filterable: true,
+    },
+    {
+      header: 'Order',
+      accessor: 'sort_order' as keyof CertificationRecord,
+      sortable: true,
+      width: '100px'
+    },
+    {
+      header: 'Status',
+      accessor: (cert: CertificationRecord) => (
+        <span className={`status-badge ${cert.is_active ? 'status-badge--active' : 'status-badge--inactive'}`}>
+          {cert.is_active ? 'Active' : 'Inactive'}
+        </span>
+      ),
+      width: '120px'
+    }
+  ];
+
   if (isLoading && certs.length === 0) {
     return (
       <div className="flex-center" style={{ height: '50vh' }}>
-        <Loader2 className="spin" size={32} />
+        <Loader2 className="spin" size={32} color="var(--primary-orange)" />
       </div>
     );
   }
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h1 className="admin-page__title" style={{ margin: 0 }}>Certifications Manager</h1>
-        <button onClick={openCreateModal} className="btn btn--orange" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Plus size={16} /> Add Certification
+    <div className="admin-content-area">
+      <div className="admin-header-row">
+        <div>
+          <h1 className="admin-page__title">Certifications</h1>
+          <p className="admin-page__subtitle">Manage professional certifications and partner logos</p>
+        </div>
+        <button onClick={openCreateModal} className="creative-btn creative-btn--sliding parallelogram" style={{ 
+          background: 'var(--primary-orange)', 
+          color: 'white', 
+          padding: '0.8rem 2rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          fontWeight: 700
+        }}>
+          <Plus size={18} /> <span>ADD NEW</span>
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-        {certs.map((cert) => (
-          <div
-            key={cert.id}
-            style={{
-              background: 'white',
-              padding: '1.5rem',
-              borderRadius: 'var(--radius-lg)',
-              boxShadow: 'var(--shadow-sm)',
-              border: '1px solid rgba(0,0,0,0.05)',
-              opacity: cert.is_active ? 1 : 0.6,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div style={{ height: '60px', width: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img src={cert.url || undefined} alt={cert.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
-                </div>
-                <span style={{ fontSize: '0.75rem', background: 'var(--bg-light)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)', color: 'var(--muted-text)' }}>
-                  Order: {cert.sort_order}
-                </span>
-              </div>
-              <h4 style={{ fontSize: '1rem', color: 'var(--dark-navy)', margin: '1rem 0 0.5rem', fontWeight: 700 }}>
-                {cert.name}
-              </h4>
-              <p style={{ fontSize: '0.75rem', color: 'var(--muted-text)', wordBreak: 'break-all' }}>
-                Image Link: {cert.url}
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '1rem' }}>
-              <button onClick={() => openEditModal(cert)} className="admin-icon-btn" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
-                <Edit2 size={14} /> Edit
-              </button>
-              <button onClick={() => handleToggleActive(cert)} className="admin-icon-btn" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
-                {cert.is_active ? <Eye size={14} /> : <EyeOff size={14} />} {cert.is_active ? 'Hide' : 'Show'}
-              </button>
-              <button onClick={() => handleDelete(cert.id)} className="admin-icon-btn admin-icon-btn--danger" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
-                <Trash2 size={14} /> Delete
-              </button>
-            </div>
+      <AdminTable
+        data={certs}
+        columns={columns}
+        title="All Certifications"
+        actions={(cert) => (
+          <div className="table-actions">
+            <button onClick={() => openEditModal(cert)} className="admin-icon-btn" title="Edit">
+              <Edit2 size={16} />
+            </button>
+            <button onClick={() => handleToggleActive(cert)} className="admin-icon-btn" title={cert.is_active ? 'Deactivate' : 'Activate'}>
+              {cert.is_active ? <Eye size={16} /> : <EyeOff size={16} />}
+            </button>
+            <button onClick={() => handleDelete(cert.id)} className="admin-icon-btn admin-icon-btn--danger" title="Delete">
+              <Trash2 size={16} />
+            </button>
           </div>
-        ))}
-      </div>
+        )}
+      />
 
       {/* MODAL FORM */}
       {modalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <div style={{ background: 'white', padding: '2rem', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '450px', boxShadow: 'var(--shadow-lg)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 style={{ margin: 0, color: 'var(--dark-navy)' }}>{editingRecord ? 'Edit Certification' : 'Add Certification'}</h3>
-              <button onClick={closeModal} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+        <div className="modal-overlay">
+          <div className="modal-card slide-in-up">
+            <div className="modal-header">
+              <h3 className="modal-title">{editingRecord ? 'Edit Certification' : 'New Certification'}</h3>
+              <button onClick={closeModal} className="modal-close"><X size={24} /></button>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Certification Name</label>
-                <input type="text" required placeholder="e.g. AWS Advanced Partner" value={name} onChange={(e) => setName(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+            <form onSubmit={handleSubmit} className="modal-form">
+              <div className="form-group">
+                <label>Certification Name</label>
+                <input 
+                  type="text" 
+                  required 
+                  placeholder="e.g. AWS Advanced Partner" 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)} 
+                  className="admin-input" 
+                />
               </div>
 
               <ImageInputWithUpload
@@ -172,21 +209,38 @@ const CertificationManager = () => {
                 value={url}
                 onChange={setUrl}
                 category="certs"
-                placeholder="e.g. https://..."
+                placeholder="Upload or paste image URL"
               />
 
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Sort Order</label>
-                <input type="number" placeholder="e.g. 0, 1, 2" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Sort Order</label>
+                  <input 
+                    type="number" 
+                    value={sortOrder} 
+                    onChange={(e) => setSortOrder(e.target.value)} 
+                    className="admin-input" 
+                  />
+                </div>
+                <div className="form-group flex-center" style={{ paddingTop: '1.5rem' }}>
+                  <label className="toggle-switch">
+                    <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
+                    <span className="toggle-slider"></span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Active</span>
+                  </label>
+                </div>
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-                Is Active (Display on site)
-              </label>
-
-              <button type="submit" className="btn btn--orange" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}>
-                {upsertMutation.isPending ? 'Saving...' : 'Save Certification'}
+              <button type="submit" className="creative-btn creative-btn--sliding" style={{ 
+                background: 'var(--primary-orange)', 
+                color: 'white', 
+                width: '100%',
+                padding: '1rem',
+                borderRadius: 'var(--radius-md)',
+                fontWeight: 700,
+                marginTop: '1rem'
+              }}>
+                {upsertMutation.isPending ? 'SAVING...' : (editingRecord ? 'UPDATE CERTIFICATION' : 'CREATE CERTIFICATION')}
               </button>
             </form>
           </div>

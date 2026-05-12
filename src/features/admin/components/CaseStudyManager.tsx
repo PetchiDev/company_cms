@@ -4,11 +4,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { caseStudyService } from '@/api/services/cmsService';
 import type { CaseStudyRecord } from '@/types/cms.types';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X, Download } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X, FileText, Table as TableIcon, LayoutGrid } from 'lucide-react';
+import { AdminTable } from '@/components/common/AdminTable/AdminTable';
+import { useToast } from '@/components/ui/Toast/ToastProvider';
+import { useConfirm } from '@/components/ui/Modal/ConfirmProvider';
 
 const CaseStudyManager = () => {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
+  const confirm = useConfirm();
   const [modalOpen, setModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [editingRecord, setEditingRecord] = useState<CaseStudyRecord | null>(null);
 
   /* Form Fields */
@@ -29,14 +35,17 @@ const CaseStudyManager = () => {
     mutationFn: (record: Partial<CaseStudyRecord>) => caseStudyService.upsert(record),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CASE_STUDIES] });
+      showToast('Case study saved successfully!', 'success');
       closeModal();
     },
+    onError: () => showToast('Failed to save case study.', 'error'),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => caseStudyService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CASE_STUDIES] });
+      showToast('Case study deleted.', 'info');
     },
   });
 
@@ -87,7 +96,13 @@ const CaseStudyManager = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this case study?')) {
+    const isConfirmed = await confirm({
+      title: 'Delete Case Study',
+      message: 'Are you sure you want to delete this case study? This action is permanent and cannot be undone.',
+      type: 'danger',
+      confirmText: 'Delete'
+    });
+    if (isConfirmed) {
       await deleteMutation.mutateAsync(id);
     }
   };
@@ -99,96 +114,140 @@ const CaseStudyManager = () => {
     });
   };
 
+  const columns = [
+    {
+      header: 'Thumbnail',
+      accessor: (study: CaseStudyRecord) => (
+        <div style={{ height: '40px', width: '70px', borderRadius: '4px', overflow: 'hidden', background: '#f1f5f9' }}>
+          <img src={study.thumbnail || undefined} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
+      ),
+      width: '90px'
+    },
+    {
+      header: 'Title',
+      accessor: 'title' as keyof CaseStudyRecord,
+      sortable: true,
+      filterable: true,
+    },
+    {
+      header: 'Category',
+      accessor: 'category' as keyof CaseStudyRecord,
+      sortable: true,
+      filterable: true,
+      width: '180px'
+    },
+    {
+      header: 'PDF',
+      accessor: (study: CaseStudyRecord) => study.pdf_link ? <FileText size={16} color="var(--primary-orange)" /> : <span style={{ opacity: 0.3 }}>—</span>,
+      width: '60px'
+    },
+    {
+      header: 'Status',
+      accessor: (study: CaseStudyRecord) => (
+        <span className={`status-badge ${study.is_active ? 'status-badge--active' : 'status-badge--inactive'}`}>
+          {study.is_active ? 'Active' : 'Inactive'}
+        </span>
+      ),
+      width: '100px'
+    }
+  ];
+
   if (isLoading && studies.length === 0) {
     return (
       <div className="flex-center" style={{ height: '50vh' }}>
-        <Loader2 className="spin" size={32} />
+        <Loader2 className="spin" size={32} color="var(--primary-orange)" />
       </div>
     );
   }
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h1 className="admin-page__title" style={{ margin: 0 }}>Case Studies Manager</h1>
-        <button onClick={openCreateModal} className="btn btn--orange" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Plus size={16} /> Add Case Study
-        </button>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
-        {studies.map((study) => (
-          <div
-            key={study.id}
-            style={{
-              background: 'white',
-              borderRadius: 'var(--radius-lg)',
-              overflow: 'hidden',
-              boxShadow: 'var(--shadow-sm)',
-              border: '1px solid rgba(0,0,0,0.05)',
-              opacity: study.is_active ? 1 : 0.6,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-            }}
-          >
-            <div>
-              <div style={{ height: '180px', overflow: 'hidden', position: 'relative' }}>
-                <img src={study.thumbnail || undefined} alt={study.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                <span style={{ position: 'absolute', top: '1rem', left: '1rem', background: 'var(--primary-blue)', color: 'white', fontSize: '0.75rem', fontWeight: 600, padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)' }}>
-                  {study.category}
-                </span>
-                <span style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: '0.7rem', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>
-                  Order: {study.sort_order}
-                </span>
-              </div>
-              <div style={{ padding: '1.5rem' }}>
-                <h4 style={{ margin: '0 0 0.5rem 0', fontWeight: 700, fontSize: '1.1rem', color: 'var(--dark-navy)' }}>{study.title}</h4>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--muted-text)', lineClamp: 2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {study.description}
-                </p>
-                {study.pdf_link && (
-                  <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.8rem', color: 'var(--primary-orange)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 600 }}>
-                    <Download size={12} /> PDF Attached
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.5rem', padding: '0 1.5rem 1.5rem 1.5rem' }}>
-              <button onClick={() => openEditModal(study)} className="admin-icon-btn" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
-                <Edit2 size={14} /> Edit
-              </button>
-              <button onClick={() => handleToggleActive(study)} className="admin-icon-btn" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
-                {study.is_active ? <Eye size={14} /> : <EyeOff size={14} />} {study.is_active ? 'Hide' : 'Show'}
-              </button>
-              <button onClick={() => handleDelete(study.id)} className="admin-icon-btn admin-icon-btn--danger" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
-                <Trash2 size={14} /> Delete
-              </button>
-            </div>
+    <div className="admin-content-area">
+      <div className="admin-header-row">
+        <div>
+          <h1 className="admin-page__title">Case Studies</h1>
+          <p className="admin-page__subtitle">Showcase successful projects and client transformations</p>
+        </div>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <div className="admin-toggle-group">
+            <button className={`toggle-btn ${viewMode === 'table' ? 'active' : ''}`} onClick={() => setViewMode('table')}><TableIcon size={18} /></button>
+            <button className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')}><LayoutGrid size={18} /></button>
           </div>
-        ))}
+          <button onClick={openCreateModal} className="creative-btn creative-btn--sliding parallelogram" style={{ 
+            background: 'var(--primary-orange)', 
+            color: 'white', 
+            padding: '0.8rem 2rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            fontWeight: 700
+          }}>
+            <Plus size={18} /> <span>NEW CASE</span>
+          </button>
+        </div>
       </div>
+
+      {viewMode === 'table' ? (
+        <AdminTable
+          data={studies}
+          columns={columns}
+          title="Case Study Inventory"
+          actions={(study) => (
+            <div className="table-actions">
+              <button onClick={() => openEditModal(study)} className="admin-icon-btn" title="Edit">
+                <Edit2 size={16} />
+              </button>
+              <button onClick={() => handleToggleActive(study)} className="admin-icon-btn" title={study.is_active ? 'Deactivate' : 'Activate'}>
+                {study.is_active ? <Eye size={16} /> : <EyeOff size={16} />}
+              </button>
+              <button onClick={() => handleDelete(study.id)} className="admin-icon-btn admin-icon-btn--danger" title="Delete">
+                <Trash2 size={16} />
+              </button>
+            </div>
+          )}
+        />
+      ) : (
+        <div className="admin-card-grid slide-in-up">
+          {studies.map((study) => (
+            <div key={study.id} className="modern-card" style={{ opacity: study.is_active ? 1 : 0.6 }}>
+              <div className="modern-card__img" style={{ height: '140px' }}>
+                <img src={study.thumbnail || undefined} alt="" />
+                <div className="modern-card__badge" style={{ background: 'var(--primary-blue)' }}>{study.category}</div>
+              </div>
+              <div className="modern-card__body">
+                <h4 className="modern-card__title" style={{ fontSize: '1rem' }}>{study.title}</h4>
+                <p className="modern-card__excerpt" style={{ fontSize: '0.8rem' }}>{study.description}</p>
+                <div className="modern-card__footer">
+                   <div className="table-actions" style={{ width: '100%' }}>
+                    <button onClick={() => openEditModal(study)} className="admin-icon-btn" style={{ flex: 1 }}><Edit2 size={14} /> Edit</button>
+                    <button onClick={() => handleDelete(study.id)} className="admin-icon-btn admin-icon-btn--danger"><Trash2 size={14} /></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* MODAL FORM */}
       {modalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <div style={{ background: 'white', padding: '2rem', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '500px', boxShadow: 'var(--shadow-lg)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 style={{ margin: 0, color: 'var(--dark-navy)' }}>{editingRecord ? 'Edit Case Study' : 'Add Case Study'}</h3>
-              <button onClick={closeModal} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+        <div className="modal-overlay">
+          <div className="modal-card slide-in-up" style={{ maxWidth: '600px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title">{editingRecord ? 'Edit Case Study' : 'New Case Study'}</h3>
+              <button onClick={closeModal} className="modal-close"><X size={24} /></button>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Case Study Title</label>
-                <input type="text" required placeholder="e.g. Migration - SharePoint Online" value={title} onChange={(e) => setTitle(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+            <form onSubmit={handleSubmit} className="modal-form">
+              <div className="form-group">
+                <label>Case Study Title</label>
+                <input type="text" required placeholder="e.g. Migration - SharePoint Online" value={title} onChange={(e) => setTitle(e.target.value)} className="admin-input" />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Category</label>
-                  <select value={category} onChange={(e) => setCategory(e.target.value)} className="admin-select" style={{ width: '100%' }}>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Category</label>
+                  <select value={category} onChange={(e) => setCategory(e.target.value)} className="admin-input">
                     <option value="Migration">Migration</option>
                     <option value="Insights & Intelligence">Insights & Intelligence</option>
                     <option value="Application Modernization">Application Modernization</option>
@@ -196,15 +255,15 @@ const CaseStudyManager = () => {
                     <option value="Cloud">Cloud</option>
                   </select>
                 </div>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Sort Order</label>
-                  <input type="number" required value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+                <div className="form-group">
+                  <label>Sort Order</label>
+                  <input type="number" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="admin-input" />
                 </div>
               </div>
 
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Brief Description</label>
-                <textarea required placeholder="Write a brief overview of the work done..." value={description} onChange={(e) => setDescription(e.target.value)} className="admin-input" rows={3} style={{ width: '100%', resize: 'none' }} />
+              <div className="form-group">
+                <label>Overview Description</label>
+                <textarea required rows={3} value={description} onChange={(e) => setDescription(e.target.value)} className="admin-input" style={{ resize: 'none' }} />
               </div>
 
               <ImageInputWithUpload
@@ -212,22 +271,29 @@ const CaseStudyManager = () => {
                 value={thumbnail}
                 onChange={setThumbnail}
                 category="cases"
-                placeholder="e.g. https://..."
               />
 
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Briefing PDF Attachment Link</label>
-                <input type="url" placeholder="e.g. https://... (optional)" value={pdfLink} onChange={(e) => setPdfLink(e.target.value)} className="admin-input" style={{ width: '100%' }} />
+              <div className="form-group">
+                <label>Briefing PDF Link (Optional)</label>
+                <input type="url" placeholder="https://..." value={pdfLink} onChange={(e) => setPdfLink(e.target.value)} className="admin-input" />
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-                Is Active (Display on site)
-              </label>
-
-              <button type="submit" className="btn btn--orange" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}>
-                {upsertMutation.isPending ? 'Saving...' : 'Save Case Study'}
-              </button>
+              <div className="flex-between">
+                <label className="toggle-switch">
+                  <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
+                  <span className="toggle-slider"></span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Active</span>
+                </label>
+                <button type="submit" className="creative-btn creative-btn--sliding" style={{ 
+                  background: 'var(--primary-orange)', 
+                  color: 'white', 
+                  padding: '1rem 3rem',
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 700
+                }}>
+                  {upsertMutation.isPending ? 'SAVING...' : (editingRecord ? 'UPDATE CASE STUDY' : 'CREATE CASE STUDY')}
+                </button>
+              </div>
             </form>
           </div>
         </div>
