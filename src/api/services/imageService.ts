@@ -173,4 +173,32 @@ export const imageService = {
 
     return urlData.publicUrl;
   },
+
+  /** Get total count of files in the images bucket (recursive) */
+  getStorageCount: async (): Promise<number> => {
+    let totalCount = 0;
+    
+    // Recursive function to count files in folders
+    const countFilesInPath = async (path: string = '') => {
+      const { data, error } = await supabase.storage
+        .from(SUPABASE_BUCKETS.IMAGES)
+        .list(path);
+      
+      if (error) throw error;
+      if (!data) return;
+
+      for (const item of data) {
+        if (item.id === null) {
+          // It's a folder (id is null for virtual folders in Supabase storage)
+          await countFilesInPath(path ? `${path}/${item.name}` : item.name);
+        } else {
+          // It's a file
+          totalCount++;
+        }
+      }
+    };
+
+    await countFilesInPath();
+    return totalCount;
+  },
 };

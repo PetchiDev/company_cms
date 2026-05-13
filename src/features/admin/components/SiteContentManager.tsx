@@ -104,6 +104,10 @@ const DEFAULT_SITE_CONTENT: Record<string, string> = {
   contact_hero_title: 'Contact Us',
   contact_section_title: "Let's Talk",
   contact_section_desc: "We'd love to hear about your project. Reach out and let's build something great together.",
+  /* ── About Page - Team Section ── */
+  about_team_label: 'Moments Beyond Work',
+  about_team_title: 'Our Team Culture',
+  about_team_desc: 'At Kryptos, we believe in fostering a vibrant community where our team can thrive both professionally and personally.',
 };
 
 const SiteContentManager = () => {
@@ -443,6 +447,15 @@ const SiteContentManager = () => {
                         {renderField(`about_approach_${n}_desc`, `Approach Step ${n} Description`)}
                       </div>
                     ))}
+
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <div className="form-separator">About Page — Moments Beyond Work</div>
+                    </div>
+                    {renderField('about_team_label', 'Team Section Label')}
+                    {renderField('about_team_title', 'Team Section Title')}
+                    <div style={{ gridColumn: 'span 2' }}>
+                      {renderField('about_team_desc', 'Team Section Description', 'textarea')}
+                    </div>
 
                     {/* ── SERVICES PAGE ── */}
                     <div style={{ gridColumn: 'span 2' }}>

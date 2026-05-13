@@ -14,11 +14,11 @@ const Dashboard = () => {
   useEffect(() => {
     const loadStats = async () => {
       try {
-        const [imgs, contacts] = await Promise.all([
-          imageService.fetchAllAdmin(),
+        const [storageCount, contacts] = await Promise.all([
+          imageService.getStorageCount(),
           contactService.fetchAll()
         ]);
-        setImgCount(imgs.length);
+        setImgCount(storageCount);
         setContactCount(contacts.length);
       } catch (err) {
         console.error(err);

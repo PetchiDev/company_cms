@@ -1,6 +1,7 @@
-import { motion } from 'framer-motion';
-import { Target, Eye, Handshake, Lightbulb, Users, Zap } from 'lucide-react';
-import { useSiteContent } from '@/hooks/useCMS';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Target, Eye, Handshake, Lightbulb, Users, Zap, X } from 'lucide-react';
+import { useSiteContent, useTeamImages } from '@/hooks/useCMS';
 import { staggerContainer, staggerItem, fadeInUp } from '@/animations/pageTransitions';
 import { useTextScramble } from '@/hooks/useTextScramble';
 import { useSEO } from '@/hooks/useSEO';
@@ -12,6 +13,8 @@ const VALUE_ICONS = [Target, Handshake, Lightbulb, Users, Zap, Eye];
 
 const AboutPage = () => {
   const { company, getText } = useSiteContent();
+  const { teamImages } = useTeamImages();
+  const [selectedImg, setSelectedImg] = useState<string | null>(null);
   const scrambledName = useTextScramble({ text: company.name, delay: 500, speed: 40, cycles: 6 });
   
   const visionImageUrl = getText('about_vision_image', visionImg);
@@ -199,6 +202,74 @@ const AboutPage = () => {
           </div>
         </div>
       </section>
+
+      {/* ═══ MOMENTS BEYOND WORK SECTION ═══ */}
+      {teamImages.length > 0 && (
+        <section className="section team-moments-section section--light">
+          <div className="container">
+            <div className="section-heading">
+              <span className="section-heading__label">{getText('about_team_label', 'Moments Beyond Work')}</span>
+              <h2 className="section-heading__title">{getText('about_team_title', 'Our Team Culture')}</h2>
+              <p className="section-heading__subtitle" style={{ maxWidth: '700px', margin: '1rem auto' }}>
+                {getText('about_team_desc', 'At Kryptos, we believe in fostering a vibrant community where our team can thrive both professionally and personally.')}
+              </p>
+            </div>
+
+            <motion.div 
+              className="team-gallery" 
+              variants={staggerContainer} 
+              initial="initial" 
+              whileInView="animate" 
+              viewport={{ once: true }}
+            >
+              {teamImages.map((img, index) => (
+                <motion.div 
+                  key={img.id} 
+                  className={`team-gallery__item team-gallery__item--${(index % 5) + 1}`}
+                  variants={staggerItem}
+                  whileHover={{ scale: 1.05, rotate: index % 2 === 0 ? 2 : -2 }}
+                  onClick={() => setSelectedImg(img.url)}
+                >
+                  <div className="team-gallery__card">
+                    <img src={img.url} alt={img.name} loading="lazy" />
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+      )}
+
+      {/* ═══ Lightbox ═══ */}
+      <AnimatePresence>
+        {selectedImg && (
+          <motion.div 
+            className="lightbox"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedImg(null)}
+          >
+            <motion.button 
+              className="lightbox__close"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setSelectedImg(null)}
+            >
+              <X size={32} />
+            </motion.button>
+            <motion.img 
+              src={selectedImg} 
+              alt="Team Moment" 
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

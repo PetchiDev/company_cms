@@ -271,3 +271,19 @@ export const useSiteLogo = () => {
   const { logo, isLoading } = useSiteContent();
   return { logo, isLoading };
 };
+
+/* ─── 11. TEAM IMAGES HOOK ─── */
+export const useTeamImages = () => {
+  const { data: dbImages = [], isLoading } = useQuery({
+    queryKey: [QUERY_KEYS.IMAGES, IMAGE_CATEGORIES.TEAM],
+    queryFn: () => mediaService.fetchByCategory(IMAGE_CATEGORIES.TEAM),
+  });
+
+  const teamImages = dbImages.map((img) => ({
+    id: img.id,
+    name: img.name,
+    url: img.url,
+  }));
+
+  return { teamImages, isLoading };
+};

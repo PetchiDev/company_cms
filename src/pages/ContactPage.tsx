@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import { useSiteContent } from '@/hooks/useCMS';
+import MagneticButton from '@/components/ui/MagneticButton/MagneticButton';
 import { BUDGET_RANGES } from '@/constants/appConstants';
 import { contactService } from '@/api/services/contactService';
 import type { ContactFormData } from '@/types/contact.types';
 
 import { useSEO } from '@/hooks/useSEO';
+import './ContactPage.css';
 
 const SocialIcon = ({ name }: { name: string }) => {
   const n = name.toLowerCase();
@@ -159,12 +161,15 @@ const ContactPage = () => {
                   I want an NDA to protect my idea
                 </label>
 
-                <button type="submit" className="magnetic-btn magnetic-btn--orange magnetic-btn--md" style={{ width: '100%', height: '54px' }} disabled={status === 'loading'}>
-                  <span className="magnetic-btn__text">
-                    {status === 'loading' ? 'Sending...' : status === 'success' ? '✓ Message Sent!' : 'Send a Request'}
-                  </span>
-                  <span className="magnetic-btn__glow" />
-                </button>
+                <MagneticButton 
+                  type="submit" 
+                  variant="orange" 
+                  size="md" 
+                  style={{ width: '100%', height: '54px' }} 
+                  disabled={status === 'loading'}
+                >
+                  {status === 'loading' ? 'Sending...' : status === 'success' ? '✓ Message Sent!' : 'Send a Request'}
+                </MagneticButton>
               </form>
             </div>
           </div>
