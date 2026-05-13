@@ -1,6 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { motion } from 'framer-motion';
-import { gsap } from '@/animations/gsapConfig';
 import { useCertifications } from '@/hooks/useCMS';
 import { staggerContainer, staggerItem } from '@/animations/pageTransitions';
 import { useSEO } from '@/hooks/useSEO';
