@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, lazy, Suspense } from 'react';
+import { useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { gsap } from '@/animations/gsapConfig';
@@ -46,6 +47,14 @@ const HomePage = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
   const marqueeRef = useRef<HTMLDivElement>(null);
+
+  const { scrollY } = useScroll();
+  const heroScrollProgress = useTransform(scrollY, [0, 800], [0, 1]);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    return heroScrollProgress.onChange(v => setScrollProgress(v));
+  }, [heroScrollProgress]);
 
   /* GSAP Animations */
   useEffect(() => {
@@ -150,8 +159,8 @@ const HomePage = () => {
             <div className="floating-shape floating-shape--3" />
           </div>
         </div>
-        <Suspense fallback={null}>
-          <HeroScene3D />
+        <Suspense fallback={<div className="hero-scene-3d-loader" />}>
+          <HeroScene3D scrollProgress={scrollProgress} />
         </Suspense>
         <ParticleField count={40} color="rgba(238,79,41,0.15)" lineColor="rgba(238,79,41,0.05)" interactive={false} />
         <div className="container hero__content">

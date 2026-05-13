@@ -20,6 +20,7 @@ interface MagneticButtonProps {
   href?: string;
   target?: string;
   rel?: string;
+  ariaLabel?: string;
 }
 
 /**
@@ -39,6 +40,7 @@ const MagneticButton = memo(({
   href,
   target,
   rel,
+  ariaLabel,
 }: MagneticButtonProps) => {
   const magneticRef = useMagneticEffect({ strength, radius: 100 });
 
@@ -47,6 +49,7 @@ const MagneticButton = memo(({
     className: `magnetic-btn magnetic-btn--${variant} magnetic-btn--${size} ${className}`,
     style,
     onClick,
+    'aria-label': ariaLabel,
   };
 
   const content = (

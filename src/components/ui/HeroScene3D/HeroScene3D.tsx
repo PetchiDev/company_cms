@@ -7,14 +7,21 @@ import * as THREE from 'three';
  * Animated floating geometric shape rendered with Three.js.
  * Creates a premium 3D feel in the hero section.
  */
-const FloatingGeometry = () => {
+const FloatingGeometry = ({ scrollProgress = 0 }: { scrollProgress?: number }) => {
   const meshRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
     if (!meshRef.current) return;
-    meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.3) * 0.2;
-    meshRef.current.rotation.y += 0.003;
-    meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.3;
+    const time = state.clock.elapsedTime;
+    
+    // Base rotation + scroll influence
+    meshRef.current.rotation.x = Math.sin(time * 0.3) * 0.2 + (scrollProgress * Math.PI);
+    meshRef.current.rotation.y += 0.003 + (scrollProgress * 0.01);
+    meshRef.current.position.y = Math.sin(time * 0.5) * 0.3 - (scrollProgress * 2);
+    
+    // Smoothly scale based on scroll
+    const scale = 2.2 + (scrollProgress * 0.5);
+    meshRef.current.scale.set(scale, scale, scale);
   });
 
   return (
@@ -48,7 +55,7 @@ const FloatingGeometry = () => {
   );
 };
 
-const HeroScene3D = memo(({ className = '' }: { className?: string }) => (
+const HeroScene3D = memo(({ className = '', scrollProgress = 0 }: { className?: string, scrollProgress?: number }) => (
   <div
     className={`hero-scene-3d ${className}`}
     style={{
@@ -59,7 +66,7 @@ const HeroScene3D = memo(({ className = '' }: { className?: string }) => (
       height: '100%',
       pointerEvents: 'none',
       zIndex: 0,
-      opacity: 0.7,
+      opacity: 0.7 - (scrollProgress * 0.5),
     }}
   >
     <Canvas
@@ -72,7 +79,7 @@ const HeroScene3D = memo(({ className = '' }: { className?: string }) => (
       <directionalLight position={[5, 5, 5]} intensity={1} color="#EE4F29" />
       <directionalLight position={[-5, -5, -5]} intensity={0.3} color="#ff9a76" />
       <pointLight position={[0, 3, 0]} intensity={0.8} color="#EE4F29" />
-      <FloatingGeometry />
+      <FloatingGeometry scrollProgress={scrollProgress} />
     </Canvas>
   </div>
 ));

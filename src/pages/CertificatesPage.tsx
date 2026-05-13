@@ -1,9 +1,11 @@
-import { useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useRef } from 'react';
 import { useCertifications } from '@/hooks/useCMS';
-import { staggerContainer, staggerItem } from '@/animations/pageTransitions';
+import { staggerContainer } from '@/animations/pageTransitions';
 import { useSEO } from '@/hooks/useSEO';
 import ParticleField from '@/components/ui/ParticleField/ParticleField';
+import Skeleton from '@/components/ui/Skeleton/Skeleton';
+import CertificateCard from './CertificateCard';
 import './CertificatesPage.css';
 
 const CertificatesPage = () => {
@@ -56,7 +58,11 @@ const CertificatesPage = () => {
             <div className="certificates-gallery">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="cert-card skeleton-card">
-                  <div className="skeleton" style={{ height: '200px', width: '100%', borderRadius: '1rem' }} />
+                  <div className="cert-card__inner">
+                    <Skeleton height={160} width={160} borderRadius="2rem" className="mx-auto mb-8" />
+                    <Skeleton height={24} width="80%" className="mx-auto mb-4" />
+                    <Skeleton height={20} width="40%" className="mx-auto" />
+                  </div>
                 </div>
               ))}
             </div>
@@ -70,24 +76,7 @@ const CertificatesPage = () => {
               viewport={{ once: true, margin: '-50px' }}
             >
               {certifications.map((cert, i) => (
-                <motion.div 
-                  key={i} 
-                  className="cert-card glass-card"
-                  variants={staggerItem}
-                  whileHover={{ y: -10, scale: 1.02 }}
-                  transition={{ type: 'spring', stiffness: 300 }}
-                >
-                  <div className="cert-card__inner">
-                    <div className="cert-card__image-container">
-                      <img src={cert.url} alt={cert.name} loading="lazy" />
-                    </div>
-                    <div className="cert-card__info">
-                      <h3 className="cert-card__name">{cert.name}</h3>
-                      <div className="cert-card__badge">Verified</div>
-                    </div>
-                  </div>
-                  <div className="cert-card__glow" />
-                </motion.div>
+                <CertificateCard key={i} cert={cert} />
               ))}
             </motion.div>
           ) : (

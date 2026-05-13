@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/common/Navbar/Navbar';
 import Footer from '@/components/common/Footer/Footer';
 import ScrollProgress from '@/components/ui/ScrollProgress/ScrollProgress';
+import ScrollToTop from '@/components/ui/ScrollToTop/ScrollToTop';
 
 const MainLayout = () => {
   const { pathname } = useLocation();
@@ -44,6 +45,7 @@ const MainLayout = () => {
         <Outlet />
       </main>
       <Footer />
+      <ScrollToTop />
     </div>
   );
 };
