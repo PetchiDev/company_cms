@@ -11,6 +11,7 @@ import {
   useCertifications,
   useTestimonials,
   useCaseStudies,
+  useBlogArticles,
   useServices,
   useClientLogos,
 } from '@/hooks/useCMS';
@@ -32,6 +33,7 @@ const HomePage = () => {
   const { certifications } = useCertifications();
   const { testimonials } = useTestimonials();
   const { caseStudies } = useCaseStudies();
+  const { blogArticles } = useBlogArticles();
   const { clientLogos } = useClientLogos();
   const { serviceCategories } = useServices();
 
@@ -372,19 +374,99 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ═══ CERTIFICATIONS ═══ */}
-      <section className="section" id="certifications-section">
+      {/* ═══ CERTIFICATIONS & CAREERS DUAL SECTION ═══ */}
+      <section className="section section--light dual-grid-section" id="credentials-section">
+        <div className="container">
+          <div className="dual-grid">
+            {/* Left Card: Certifications */}
+            <motion.div 
+              className="dual-card dual-card--dark animate-on-scroll"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="dual-card__content">
+                <span className="dual-card__label">Certifications</span>
+                <h2 className="dual-card__title">Certifications that Validate Excellence</h2>
+                <div className="dual-card__badges">
+                  {certifications.slice(0, 3).map((cert, i) => (
+                    <div key={i} className="mini-badge-glass">
+                      <img src={cert.url} alt={cert.name} />
+                    </div>
+                  ))}
+                </div>
+                <Link to={ROUTES.CERTIFICATES} className="magnetic-btn magnetic-btn--orange magnetic-btn--md">
+                  <span className="magnetic-btn__text">View Certifications</span>
+                  <span className="magnetic-btn__glow" />
+                </Link>
+              </div>
+              <div className="dual-card__bg-pattern" />
+            </motion.div>
+
+            {/* Right Card: Careers */}
+            <motion.div 
+              className="dual-card dual-card--white animate-on-scroll"
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="dual-card__content">
+                <span className="dual-card__label">Careers</span>
+                <h2 className="dual-card__title">Create a great career and grow your future with Kryptos</h2>
+                <div className="dual-card__image-box">
+                  <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80" alt="Team working" className="dual-card__main-img" />
+                  <div className="dual-card__floating-box glow-pulse">
+                    <span className="text-orange font-bold">Join Us</span>
+                  </div>
+                </div>
+                <a href={getText('job_portal_url', '#')} target="_blank" rel="noopener noreferrer" className="magnetic-btn magnetic-btn--primary magnetic-btn--md">
+                  <span className="magnetic-btn__text">View Openings</span>
+                  <span className="magnetic-btn__glow" />
+                </a>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ BLOG SECTION ═══ */}
+      <section className="section blog-section" id="blog-section">
         <div className="container">
           <div className="section-heading animate-on-scroll">
-            <span className="section-heading__label">{getText('certifications_section_label', 'Certifications')}</span>
-            <h2 className="section-heading__title">{getText('certifications_section_title', 'Our Credentials')}</h2>
+            <span className="section-heading__label">{getText('blog_section_label', 'Insights')}</span>
+            <h2 className="section-heading__title">{getText('blog_section_title', 'Latest from our Blog')}</h2>
+            <p className="section-heading__subtitle">{getText('blog_section_subtitle', 'Expert perspectives on the future of technology')}</p>
           </div>
-          <div className="certifications-grid animate-on-scroll">
-            {certifications.map((cert, i) => (
-              <div key={i} className="certification-badge" style={{ animationDelay: `${i * 0.3}s` }}>
-                <img src={cert.url} alt={cert.name} loading="lazy" />
-              </div>
+          <div className="blog-home-grid">
+            {blogArticles.slice(0, 3).map((article) => (
+              <motion.div 
+                key={article.id} 
+                className="blog-home-card glass-card--service"
+                whileHover={{ y: -10 }}
+              >
+                <div className="blog-home-card__img">
+                  <img src={article.image} alt={article.title} />
+                  <div className="blog-home-card__date">
+                    {new Date(article.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </div>
+                </div>
+                <div className="blog-home-card__body">
+                  <h3 className="blog-home-card__title">{article.title}</h3>
+                  <p className="blog-home-card__excerpt">{article.excerpt}</p>
+                  <Link to={article.link} className="blog-home-card__link">
+                    Read More <ArrowRight size={14} />
+                  </Link>
+                </div>
+              </motion.div>
             ))}
+          </div>
+          <div className="blog-section__actions animate-on-scroll">
+            <Link to={ROUTES.BLOG} className="magnetic-btn magnetic-btn--outline magnetic-btn--md">
+              <span className="magnetic-btn__text">View All Articles</span>
+              <span className="magnetic-btn__glow" />
+            </Link>
           </div>
         </div>
       </section>

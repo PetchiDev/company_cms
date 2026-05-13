@@ -15,6 +15,7 @@ const ContactPage = lazy(() => import('@/pages/ContactPage'));
 const BlogPage = lazy(() => import('@/pages/BlogPage'));
 const BlogDetailPage = lazy(() => import('@/pages/BlogDetailPage'));
 const CaseStudiesPage = lazy(() => import('@/pages/CaseStudiesPage'));
+const CertificatesPage = lazy(() => import('@/pages/CertificatesPage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const AdminPage = lazy(() => import('@/pages/AdminPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
@@ -48,6 +49,7 @@ const router = createBrowserRouter([
       { path: 'blog', element: <Suspense fallback={<Loader />}><BlogPage /></Suspense> },
       { path: 'blog/:id', element: <Suspense fallback={<Loader />}><BlogDetailPage /></Suspense> },
       { path: 'case-studies', element: <Suspense fallback={<Loader />}><CaseStudiesPage /></Suspense> },
+      { path: 'certificates', element: <Suspense fallback={<Loader />}><CertificatesPage /></Suspense> },
       { path: '*', element: <Suspense fallback={<Loader />}><NotFoundPage /></Suspense> },
     ],
   },

@@ -8,6 +8,7 @@ export const ROUTES = {
   BLOG: '/blog',
   BLOG_DETAIL: '/blog/:id',
   CASE_STUDIES: '/case-studies',
+  CERTIFICATES: '/certificates',
   LOGIN: '/login',
   ADMIN: '/admin',
   ADMIN_IMAGES: '/admin/images',
