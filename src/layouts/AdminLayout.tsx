@@ -16,11 +16,25 @@ import {
   Settings,
   Heart,
 } from 'lucide-react';
+import { useEffect } from 'react';
 import './AdminLayout.css';
 
 const AdminLayout = () => {
   const { logout, user } = useAuth();
   const location = useLocation();
+
+  useEffect(() => {
+    // Force immediate scroll to top on tab change in admin panel
+    const htmlEl = document.documentElement;
+    const originalScrollBehavior = htmlEl.style.scrollBehavior;
+    htmlEl.style.scrollBehavior = 'auto';
+    window.scrollTo({ top: 0, left: 0 });
+    
+    // Restore smooth scroll behavior
+    requestAnimationFrame(() => {
+      htmlEl.style.scrollBehavior = originalScrollBehavior;
+    });
+  }, [location.pathname]);
 
   const navItems = [
     { path: ROUTES.ADMIN, icon: LayoutDashboard, label: 'Dashboard', exact: true },

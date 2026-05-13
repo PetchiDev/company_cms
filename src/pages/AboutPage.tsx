@@ -4,33 +4,38 @@ import { useSiteContent } from '@/hooks/useCMS';
 import { staggerContainer, staggerItem, fadeInUp } from '@/animations/pageTransitions';
 import { useTextScramble } from '@/hooks/useTextScramble';
 import { useSEO } from '@/hooks/useSEO';
-import GlassCard from '@/components/ui/GlassCard/GlassCard';
+import visionImg from '@/assets/images/vision.png';
+import missionImg from '@/assets/images/mission.png';
 import './AboutPage.css';
 
-const coreValues = [
-  { icon: Target, title: 'Customer Focus', desc: 'Value customers with quality of work.' },
-  { icon: Handshake, title: 'Transparency', desc: 'Be the partner of choice by being transparent & ethical.' },
-  { icon: Lightbulb, title: 'Innovation', desc: 'Constantly explore new technologies and methodologies.' },
-  { icon: Users, title: 'Team Work', desc: 'Value employees for their quality of work.' },
-  { icon: Zap, title: 'Agility', desc: 'Adapt quickly to changing business needs.' },
-  { icon: Eye, title: 'Fun Place To Work', desc: 'Creating an enjoyable and engaging work environment.' },
-];
-
-const approach = [
-  { step: '01', title: 'Listen', desc: 'Listen to your concerns, needs, challenges, and goals.' },
-  { step: '02', title: 'Understand', desc: 'Understand your business, market sector, and competitors.' },
-  { step: '03', title: 'Deliver', desc: 'Combine with technical expertise to deliver optimal, cost-effective solutions.' },
-];
+const VALUE_ICONS = [Target, Handshake, Lightbulb, Users, Zap, Eye];
 
 const AboutPage = () => {
-  const { company } = useSiteContent();
+  const { company, getText } = useSiteContent();
   const scrambledName = useTextScramble({ text: company.name, delay: 500, speed: 40, cycles: 6 });
+  
+  const visionImageUrl = getText('about_vision_image', visionImg);
+  const missionImageUrl = getText('about_mission_image', missionImg);
 
   useSEO({
     title: 'About Us',
     description: `Learn more about ${company.name || 'Kryptos InfoSys'}. Our vision is: ${company.vision}. Our mission is: ${company.mission}.`,
     keywords: 'Kryptos InfoSys, about us, corporate values, business vision, corporate mission, IT expertise'
   });
+
+  /* Dynamic core values from CMS */
+  const coreValues = [1,2,3,4,5,6].map((n, i) => ({
+    icon: VALUE_ICONS[i],
+    title: getText(`about_value_${n}_title`, ['Customer Focus','Transparency','Innovation','Team Work','Agility','Fun Place To Work'][i]),
+    desc: getText(`about_value_${n}_desc`, ['Value customers with quality of work.','Be the partner of choice by being transparent & ethical.','Constantly explore new technologies and methodologies.','Value employees for their quality of work.','Adapt quickly to changing business needs.','Creating an enjoyable and engaging work environment.'][i]),
+  }));
+
+  /* Dynamic approach steps from CMS */
+  const approach = [1,2,3].map((n, i) => ({
+    step: `0${n}`,
+    title: getText(`about_approach_${n}_title`, ['Listen','Understand','Deliver'][i]),
+    desc: getText(`about_approach_${n}_desc`, ['Listen to your concerns, needs, challenges, and goals.','Understand your business, market sector, and competitors.','Combine with technical expertise to deliver optimal, cost-effective solutions.'][i]),
+  }));
 
   return (
     <div className="about-page">
@@ -39,7 +44,7 @@ const AboutPage = () => {
         <div className="floating-shape floating-shape--1" />
         <div className="floating-shape floating-shape--2" />
         <div className="container page-hero__content">
-          <motion.span className="page-hero__label" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>Who We Are</motion.span>
+          <motion.span className="page-hero__label" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>{getText('about_hero_label', 'Who We Are')}</motion.span>
           <motion.h1 className="page-hero__title" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
             About <span className="text-gradient-animated">{scrambledName}</span>
           </motion.h1>
@@ -47,19 +52,101 @@ const AboutPage = () => {
         </div>
       </section>
 
-      <section className="section">
+      {/* ═══ VISION & MISSION SECTION ═══ */}
+      <section className="section vision-mission-section" style={{ overflow: 'hidden' }}>
         <div className="container">
-          <div className="about-grid">
-            <GlassCard className="about-card-glass" tiltIntensity={4}>
-              <Eye size={32} className="text-blue" />
-              <h3>Our Vision</h3>
-              <p>{company.vision}</p>
-            </GlassCard>
-            <GlassCard className="about-card-glass" tiltIntensity={4}>
-              <Target size={32} className="text-orange" />
-              <h3>Our Mission</h3>
-              <p>{company.mission}</p>
-            </GlassCard>
+          {/* Vision Block */}
+          <div className="about-row">
+            <motion.div 
+              className="about-image-wrapper" 
+              initial={{ opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+            >
+              <div className="about-image-glow about-image-glow--blue" />
+              <img src={visionImageUrl} alt="Kryptos Vision" className="about-premium-image" />
+              <div className="about-image-overlay-card">
+                <Eye size={20} className="text-blue animate-pulse" />
+                <span>{getText('about_vision_badge', 'Future-Focused')}</span>
+              </div>
+            </motion.div>
+            
+            <motion.div 
+              className="about-text-content"
+              initial={{ opacity: 0, x: 60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
+            >
+              <span className="about-section-subtitle">{getText('about_vision_subtitle', 'Aspiration & Direction')}</span>
+              <h2 className="about-section-heading">Our <span>Vision</span></h2>
+              <p className="about-section-text">{company.vision}</p>
+              
+              <div className="about-pillar-list">
+                <div className="about-pillar-item">
+                  <span className="pillar-dot pillar-dot--blue" />
+                  <div>
+                    <h4>{getText('about_vision_pillar1_title', 'Integrated Growth Partnership')}</h4>
+                    <p>{getText('about_vision_pillar1_desc', 'Delivering mutual success with a strong emphasis on client trust and transparency.')}</p>
+                  </div>
+                </div>
+                <div className="about-pillar-item">
+                  <span className="pillar-dot pillar-dot--blue" />
+                  <div>
+                    <h4>{getText('about_vision_pillar2_title', 'Ethical & Transparent Standards')}</h4>
+                    <p>{getText('about_vision_pillar2_desc', 'Setting the gold standard of partnership by prioritizing corporate ethics and honesty.')}</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Mission Block (Alternating Layout) */}
+          <div className="about-row about-row--alt">
+            <motion.div 
+              className="about-text-content"
+              initial={{ opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+            >
+              <span className="about-section-subtitle">{getText('about_mission_subtitle', 'Execution & Deliverables')}</span>
+              <h2 className="about-section-heading">Our <span>Mission</span></h2>
+              <p className="about-section-text">{company.mission}</p>
+              
+              <div className="about-pillar-list">
+                <div className="about-pillar-item">
+                  <span className="pillar-dot pillar-dot--orange" />
+                  <div>
+                    <h4>{getText('about_mission_pillar1_title', 'Value with Quality of Work')}</h4>
+                    <p>{getText('about_mission_pillar1_desc', 'Creating highly robust application portfolios using top-tier, modern software standards.')}</p>
+                  </div>
+                </div>
+                <div className="about-pillar-item">
+                  <span className="pillar-dot pillar-dot--orange" />
+                  <div>
+                    <h4>{getText('about_mission_pillar2_title', 'Empowering Employee Quality')}</h4>
+                    <p>{getText('about_mission_pillar2_desc', 'Fostering an inclusive workspace environment where premium talent can thrive and innovate.')}</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div 
+              className="about-image-wrapper"
+              initial={{ opacity: 0, x: 60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
+            >
+              <div className="about-image-glow about-image-glow--orange" />
+              <img src={missionImageUrl} alt="Kryptos Mission" className="about-premium-image" />
+              <div className="about-image-overlay-card about-image-overlay-card--orange">
+                <Target size={20} className="text-orange animate-pulse" />
+                <span>{getText('about_mission_badge', 'Action-Oriented')}</span>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -67,8 +154,8 @@ const AboutPage = () => {
       <section className="section section--light">
         <div className="container">
           <div className="section-heading">
-            <span className="section-heading__label">What Drives Us</span>
-            <h2 className="section-heading__title">Core <span>Values</span></h2>
+            <span className="section-heading__label">{getText('about_values_label', 'What Drives Us')}</span>
+            <h2 className="section-heading__title">{getText('about_values_title', 'Core Values')}</h2>
           </div>
           <motion.div className="values-grid perspective-1000" variants={staggerContainer} initial="initial" whileInView="animate" viewport={{ once: true }}>
             {coreValues.map((val, i) => (
@@ -87,8 +174,8 @@ const AboutPage = () => {
       <section className="section">
         <div className="container">
           <div className="section-heading">
-            <span className="section-heading__label">How We Work</span>
-            <h2 className="section-heading__title">Our <span>Approach</span></h2>
+            <span className="section-heading__label">{getText('about_approach_label', 'How We Work')}</span>
+            <h2 className="section-heading__title">{getText('about_approach_title', 'Our Approach')}</h2>
           </div>
           <div className="approach-timeline">
             {approach.map((item, i) => (

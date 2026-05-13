@@ -2,13 +2,14 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import * as LucideIcons from 'lucide-react';
 import { ArrowRight } from 'lucide-react';
-import { useServices } from '@/hooks/useCMS';
+import { useServices, useSiteContent } from '@/hooks/useCMS';
 import { staggerContainer, staggerItem } from '@/animations/pageTransitions';
 import { useSEO } from '@/hooks/useSEO';
 import './ServicesPage.css';
 
 const ServicesPage = () => {
   const { serviceCategories } = useServices();
+  const { getText } = useSiteContent();
 
   useSEO({
     title: 'Services',
@@ -23,12 +24,12 @@ const ServicesPage = () => {
         <div className="floating-shape floating-shape--1" />
         <div className="floating-shape floating-shape--3" />
         <div className="container page-hero__content">
-          <motion.span className="page-hero__label" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>Our Expertise</motion.span>
+          <motion.span className="page-hero__label" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>{getText('services_hero_label', 'Our Expertise')}</motion.span>
           <motion.h1 className="page-hero__title" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-            Business & <span className="text-gradient-animated">Services</span>
+            {getText('services_hero_title', 'Business & Services')}
           </motion.h1>
           <motion.p className="page-hero__subtitle" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-            Comprehensive IT solutions to transform your business and accelerate digital growth
+            {getText('services_hero_subtitle', 'Comprehensive IT solutions to transform your business and accelerate digital growth')}
           </motion.p>
         </div>
       </section>

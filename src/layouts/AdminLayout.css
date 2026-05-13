@@ -15,7 +15,7 @@
   left: 0;
   bottom: 0;
   z-index: var(--z-sticky);
-  overflow: hidden; /* Prevent sidebar itself from scrolling */
+  overflow-y: auto; /* Allow sidebar scrolling when items overflow */
 }
 
 .admin-sidebar__nav {

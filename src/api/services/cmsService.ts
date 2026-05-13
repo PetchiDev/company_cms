@@ -37,12 +37,14 @@ export const siteContentService = {
   update: async (key: string, value: string): Promise<SiteContent> => {
     /* Determine the section based on the key prefix to satisfy the NOT NULL constraint */
     let section = 'company';
-    if (key.startsWith('contact_') || key.startsWith('office_')) {
+    if ((key.startsWith('contact_phone') || key.startsWith('contact_email') || key.startsWith('office_'))) {
       section = 'contact';
     } else if (key.startsWith('social_')) {
       section = 'social';
     } else if (key === 'job_portal_url') {
       section = 'careers';
+    } else if (key.startsWith('stats_')) {
+      section = 'stats';
     }
 
     const { data, error } = await supabase

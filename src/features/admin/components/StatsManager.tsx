@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/queryKeys';
-import { statsService } from '@/api/services/cmsService';
+import { statsService, siteContentService } from '@/api/services/cmsService';
+import { useSiteContent } from '@/hooks/useCMS';
 import type { StatRecord } from '@/types/cms.types';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X, BarChart, Table as TableIcon, LayoutGrid } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X, BarChart, Table as TableIcon, LayoutGrid, Save } from 'lucide-react';
 import { AdminTable } from '@/components/common/AdminTable/AdminTable';
 import { useToast } from '@/components/ui/Toast/ToastProvider';
 import { useConfirm } from '@/components/ui/Modal/ConfirmProvider';
@@ -15,6 +16,34 @@ const StatsManager = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [editingRecord, setEditingRecord] = useState<StatRecord | null>(null);
+
+  /* Section Header States */
+  const siteContentQuery = useSiteContent();
+  const [sectionTitle, setSectionTitle] = useState('');
+  const [sectionActive, setSectionActive] = useState(true);
+  const [savingTitle, setSavingTitle] = useState(false);
+
+  useEffect(() => {
+    if (!siteContentQuery.isLoading) {
+      setSectionTitle(siteContentQuery.getText('stats_section_title', 'IT excellence in the | USA and India'));
+      setSectionActive(siteContentQuery.getText('stats_section_active', 'true') === 'true');
+    }
+  }, [siteContentQuery.isLoading]);
+
+  const handleSaveSectionHeader = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingTitle(true);
+    try {
+      await siteContentService.update('stats_section_title', sectionTitle);
+      await siteContentService.update('stats_section_active', sectionActive ? 'true' : 'false');
+      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SITE_CONTENT] });
+      showToast('Section header configuration updated!', 'success');
+    } catch (err) {
+      showToast('Failed to update section header.', 'error');
+    } finally {
+      setSavingTitle(false);
+    }
+  };
 
   /* Form Fields */
   const [label, setLabel] = useState('');
@@ -180,6 +209,72 @@ const StatsManager = () => {
           }}>
             <Plus size={18} /> <span>ADD STAT</span>
           </button>
+        </div>
+      </div>
+
+      {/* ═══ SECTION HEADER CONFIGURATION CARD ═══ */}
+      <div className="admin-card-v2 slide-in-up" style={{ marginBottom: '2rem' }}>
+        <div className="admin-card-v2__header" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+          <h3>Section Header Configuration</h3>
+          <span style={{ fontSize: '0.8rem', color: 'var(--muted-text)', fontWeight: 400 }}>
+            Use a pipe character <code>|</code> to highlight keywords with our brand orange gradient (e.g. <code>IT excellence in the | USA and India</code>)
+          </span>
+        </div>
+        <div className="admin-card-v2__body">
+          <form onSubmit={handleSaveSectionHeader} className="modal-form" style={{ padding: 0 }}>
+            <div className="form-grid-2" style={{ alignItems: 'flex-end', gap: '1.5rem' }}>
+              <div className="form-group" style={{ margin: 0 }}>
+                <label>Section Title Text</label>
+                <input
+                  type="text"
+                  value={sectionTitle}
+                  onChange={(e) => setSectionTitle(e.target.value)}
+                  placeholder="e.g. IT excellence in the | USA and India"
+                  className="admin-input"
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', height: '44px', flexWrap: 'wrap' }}>
+                <label className="checkbox-label" style={{ margin: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', userSelect: 'none' }}>
+                  <input
+                    type="checkbox"
+                    checked={sectionActive}
+                    onChange={(e) => setSectionActive(e.target.checked)}
+                    className="admin-checkbox"
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span style={{ color: 'var(--text-light)', fontSize: '0.9rem', fontWeight: 500 }}>Show Heading on Site</span>
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={savingTitle || (
+                    sectionTitle === siteContentQuery.getText('stats_section_title', 'IT excellence in the | USA and India') &&
+                    sectionActive === (siteContentQuery.getText('stats_section_active', 'true') === 'true')
+                  )}
+                  className="creative-btn creative-btn--sliding parallelogram"
+                  style={{
+                    background: (sectionTitle !== siteContentQuery.getText('stats_section_title', 'IT excellence in the | USA and India') ||
+                                 sectionActive !== (siteContentQuery.getText('stats_section_active', 'true') === 'true'))
+                      ? 'var(--primary-orange)'
+                      : 'var(--bg-light)',
+                    color: (sectionTitle !== siteContentQuery.getText('stats_section_title', 'IT excellence in the | USA and India') ||
+                            sectionActive !== (siteContentQuery.getText('stats_section_active', 'true') === 'true'))
+                      ? 'white'
+                      : 'var(--muted-text)',
+                    padding: '0.6rem 2rem',
+                    fontSize: '0.85rem',
+                    margin: 0,
+                    height: '100%'
+                  }}
+                >
+                  {savingTitle ? <Loader2 className="spin" size={16} /> : <Save size={16} />}
+                  <span>{savingTitle ? 'SAVING...' : 'SAVE CONFIG'}</span>
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
 

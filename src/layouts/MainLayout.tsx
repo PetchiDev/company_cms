@@ -9,7 +9,31 @@ const MainLayout = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const htmlEl = document.documentElement;
+    const originalScrollBehavior = htmlEl.style.scrollBehavior;
+    htmlEl.style.scrollBehavior = 'auto';
+    
+    // 1. Immediate scroll
+    window.scrollTo({ top: 0, left: 0 });
+    
+    // 2. Delayed scrolls to handle React Suspense dynamic chunks loading latency
+    const t1 = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0 });
+    }, 50);
+    
+    const t2 = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0 });
+    }, 150);
+    
+    // Restore smooth scroll behavior for in-page anchors
+    requestAnimationFrame(() => {
+      htmlEl.style.scrollBehavior = originalScrollBehavior;
+    });
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, [pathname]);
 
   return (

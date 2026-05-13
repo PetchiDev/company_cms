@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download } from 'lucide-react';
 import { useCaseStudies } from '@/hooks/useCMS';
+import { useSiteContent } from '@/hooks/useCMS';
 import { useSEO } from '@/hooks/useSEO';
 import { staggerContainer, staggerItem } from '@/animations/pageTransitions';
 
 const CaseStudiesPage = () => {
   const { caseStudies } = useCaseStudies();
+  const { getText } = useSiteContent();
   const [activeFilter, setActiveFilter] = useState('All');
 
   useSEO({
@@ -24,8 +26,8 @@ const CaseStudiesPage = () => {
         <div className="page-hero__bg" />
         <div className="floating-shape floating-shape--1" />
         <div className="container page-hero__content">
-          <motion.span className="page-hero__label" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>Our Work</motion.span>
-          <motion.h1 className="page-hero__title" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>Case <span className="text-gradient-animated">Studies</span></motion.h1>
+          <motion.span className="page-hero__label" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>{getText('casestudies_hero_label', 'Our Work')}</motion.span>
+          <motion.h1 className="page-hero__title" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>{getText('casestudies_hero_title', 'Case Studies')}</motion.h1>
         </div>
       </section>
 

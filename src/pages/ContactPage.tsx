@@ -26,7 +26,7 @@ const SocialIcon = ({ name }: { name: string }) => {
 };
 
 const ContactPage = () => {
-  const { contactInfo, socialLinks } = useSiteContent();
+  const { contactInfo, socialLinks, getText } = useSiteContent();
   const [formData, setFormData] = useState<ContactFormData>({
     name: '', email: '', phone: '', company: '', message: '', budget: '$20,000–$50,000', wants_nda: false,
   });
@@ -54,10 +54,10 @@ const ContactPage = () => {
         <div className="page-hero__bg" />
         <div className="container page-hero__content">
           <motion.span className="page-hero__label" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            Get in Touch
+            {getText('contact_hero_label', 'Get in Touch')}
           </motion.span>
           <motion.h1 className="page-hero__title" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            Contact <span className="text-gradient-animated">Us</span>
+            {getText('contact_hero_title', 'Contact Us')}
           </motion.h1>
         </div>
       </section>
@@ -67,9 +67,9 @@ const ContactPage = () => {
           <div className="contact-cta-grid">
             {/* Left Column: Info */}
             <div className="contact-info-col">
-              <h2 className="section-title">Let's <span className="text-gradient-animated">Talk</span></h2>
+              <h2 className="section-title">{getText('contact_section_title', "Let's Talk")}</h2>
               <p className="section-subtitle" style={{ textAlign: 'left', marginLeft: 0 }}>
-                We'd love to hear about your project. Reach out and let's build something great together.
+                {getText('contact_section_desc', "We'd love to hear about your project. Reach out and let's build something great together.")}
               </p>
               
               <div className="contact-details-list" style={{ marginTop: '2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>

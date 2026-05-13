@@ -27,7 +27,7 @@ import './HomePage.css';
 const HeroScene3D = lazy(() => import('@/components/ui/HeroScene3D/HeroScene3D'));
 
 const HomePage = () => {
-  const { company, contactInfo } = useSiteContent();
+  const { company, contactInfo, getText } = useSiteContent();
   const { stats } = useStats();
   const { certifications } = useCertifications();
   const { testimonials } = useTestimonials();
@@ -156,9 +156,9 @@ const HomePage = () => {
           <div className="hero__text">
             <p className="hero__label">Welcome to {company.name}</p>
             <h1 className="hero__title">
-              <span className="hero__title-line">Revolutionizing</span>
-              <span className="hero__title-line">Business with <span className="text-gradient-animated">Smart</span></span>
-              <span className="hero__title-line"><span className="text-gradient-animated">IT Solutions</span></span>
+              <span className="hero__title-line">{getText('hero_title_line1', 'Revolutionizing')}</span>
+              <span className="hero__title-line">{getText('hero_title_line2', 'Business with Smart')}</span>
+              <span className="hero__title-line"><span className="text-gradient-animated">{getText('hero_title_line3', 'IT Solutions')}</span></span>
             </h1>
             <motion.div className="hero__actions" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }}>
               <MagneticButton to={ROUTES.SERVICES} variant="orange" size="xl">
@@ -181,10 +181,10 @@ const HomePage = () => {
           <div className="clients__layout">
             <div className="clients__info">
               <h2 className="clients__heading">
-                <span className="text-highlight">Elevating Experiences</span> for Our Esteemed Clients
+                {getText('clients_heading', 'Elevating Experiences for Our Esteemed Clients')}
               </h2>
               <p className="clients__subheading">
-                Trusted by global industry leaders to deliver excellence and innovation.
+                {getText('clients_subheading', 'Trusted by global industry leaders to deliver excellence and innovation.')}
               </p>
             </div>
             
@@ -213,9 +213,9 @@ const HomePage = () => {
       <section className="section" id="services-section">
         <div className="container">
           <div className="section-heading animate-on-scroll">
-            <span className="section-heading__label">What We Do</span>
-            <h2 className="section-heading__title">Our <span>Services</span></h2>
-            <p className="section-heading__subtitle">Comprehensive IT solutions to transform your business</p>
+            <span className="section-heading__label">{getText('services_section_label', 'What We Do')}</span>
+            <h2 className="section-heading__title">{getText('services_section_title', 'Our Services')}</h2>
+            <p className="section-heading__subtitle">{getText('services_section_subtitle', 'Comprehensive IT solutions to transform your business')}</p>
           </div>
           <motion.div className="services-grid perspective-1000" variants={staggerContainer} initial="initial" whileInView="animate" viewport={{ once: true, margin: '-100px' }}>
             {topServices.map((service) => {
@@ -244,31 +244,63 @@ const HomePage = () => {
       </section>
 
       {/* ═══ STATS ═══ */}
-      <section className="stats-section section--dark" ref={statsRef} id="stats-section">
-        <ParticleField count={30} color="rgba(238,79,41,0.25)" lineColor="rgba(238,79,41,0.06)" interactive={false} />
-        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-          <div className="stats-grid">
-            {stats.map((stat, i) => (
-              <div key={i} className="stat glass-stat">
-                <AnimatedCounter
-                  target={stat.value}
-                  suffix={stat.suffix}
-                  formatLakh={stat.value >= 1000}
-                  className="stat__counter"
-                />
-                <p className="stat__label">{stat.label}</p>
+      {stats.length > 0 && (
+        <section className="stats-section section--dark" ref={statsRef} id="stats-section">
+          <ParticleField count={30} color="rgba(238,79,41,0.25)" lineColor="rgba(238,79,41,0.06)" interactive={false} />
+          <div className="container" style={{ position: 'relative', zIndex: 1 }}>
+            {getText('stats_section_active', 'true') === 'true' && getText('stats_section_title', 'IT excellence in the | USA and India').trim() !== '' && (
+              <div className="stats-heading text-center" style={{ marginBottom: '3rem' }}>
+                <h2 className="stats-heading__title" style={{ 
+                  color: 'white', 
+                  fontSize: 'clamp(1.5rem, 3.5vw, 2.2rem)', 
+                  fontWeight: 800,
+                  letterSpacing: '0.5px',
+                  fontFamily: "'Outfit', sans-serif",
+                  textAlign: 'center'
+                }}>
+                  {(() => {
+                    const titleText = getText('stats_section_title', 'IT excellence in the | USA and India');
+                    const parts = titleText.split('|').map(p => p.trim());
+                    if (parts.length > 1) {
+                      return (
+                        <>
+                          {parts[0]}{' '}
+                          <span style={{ background: 'linear-gradient(135deg, var(--primary-orange) 0%, #ff8c42 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                            {parts[1]}
+                          </span>
+                        </>
+                      );
+                    }
+                    return titleText;
+                  })()}
+                </h2>
+                <div style={{ width: '60px', height: '3px', background: 'var(--primary-orange)', margin: '1rem auto 0', borderRadius: 'var(--radius-full)' }} />
               </div>
-            ))}
+            )}
+
+            <div className="stats-grid">
+              {stats.map((stat, i) => (
+                <div key={i} className="stat glass-stat">
+                  <AnimatedCounter
+                    target={stat.value}
+                    suffix={stat.suffix}
+                    formatLakh={stat.value >= 1000}
+                    className="stat__counter"
+                  />
+                  <p className="stat__label">{stat.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ═══ TESTIMONIALS ═══ */}
       <section className="section" id="testimonials-section">
         <div className="container">
           <div className="section-heading animate-on-scroll">
-            <span className="section-heading__label">Testimonials</span>
-            <h2 className="section-heading__title">What Our <span>Clients</span> Say</h2>
+            <span className="section-heading__label">{getText('testimonials_section_label', 'Testimonials')}</span>
+            <h2 className="section-heading__title">{getText('testimonials_section_title', 'What Our Clients Say')}</h2>
           </div>
           {testimonials.length > 0 && (
             <motion.div className="testimonials" variants={fadeInUp} initial="initial" whileInView="animate" viewport={{ once: true }}>
@@ -309,8 +341,8 @@ const HomePage = () => {
       <section className="section section--light" id="case-studies-section">
         <div className="container">
           <div className="section-heading animate-on-scroll">
-            <span className="section-heading__label">Our Work</span>
-            <h2 className="section-heading__title">Case <span>Studies</span></h2>
+            <span className="section-heading__label">{getText('casestudies_section_label', 'Our Work')}</span>
+            <h2 className="section-heading__title">{getText('casestudies_section_title', 'Case Studies')}</h2>
           </div>
           <motion.div className="case-studies-grid perspective-1000" variants={staggerContainer} initial="initial" whileInView="animate" viewport={{ once: true }}>
             {caseStudies.slice(0, 3).map((cs) => (
@@ -344,8 +376,8 @@ const HomePage = () => {
       <section className="section" id="certifications-section">
         <div className="container">
           <div className="section-heading animate-on-scroll">
-            <span className="section-heading__label">Certifications</span>
-            <h2 className="section-heading__title">Our <span>Credentials</span></h2>
+            <span className="section-heading__label">{getText('certifications_section_label', 'Certifications')}</span>
+            <h2 className="section-heading__title">{getText('certifications_section_title', 'Our Credentials')}</h2>
           </div>
           <div className="certifications-grid animate-on-scroll">
             {certifications.map((cert, i) => (
@@ -363,12 +395,12 @@ const HomePage = () => {
         <div className="container" style={{ position: 'relative', zIndex: 1 }}>
           <div className="contact-cta-grid">
             <div className="contact-cta__info animate-on-scroll">
-              <span className="section-heading__label">Get Started</span>
+              <span className="section-heading__label">{getText('contact_cta_label', 'Get Started')}</span>
               <h2 style={{ color: 'white', fontSize: 'clamp(2rem,4vw,2.5rem)', marginBottom: '1rem' }}>
-                Let's Build Something <span className="text-gradient-animated">Great Together</span>
+                {getText('contact_cta_title', "Let's Build Something Great Together")}
               </h2>
               <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '2rem', lineHeight: 1.7 }}>
-                Have a project in mind? We'd love to hear about it. Drop us a message and we'll get back to you as soon as possible.
+                {getText('contact_cta_desc', "Have a project in mind? We'd love to hear about it. Drop us a message and we'll get back to you as soon as possible.")}
               </p>
               <div className="contact-cta__details">
                 <div className="contact-cta__detail">
