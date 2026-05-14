@@ -5,15 +5,15 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: white;
-  color: var(--primary-orange);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  background: var(--primary-orange);
+  color: white;
+  box-shadow: 0 10px 25px rgba(238, 79, 41, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: var(--z-fixed);
   cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: none;
 }
 
 .scroll-to-top__icon {

@@ -12,6 +12,7 @@ import CultureManager from '@/features/admin/components/CultureManager';
 import ImageManager from '@/features/admin/components/ImageManager';
 import ContactManager from '@/features/admin/components/ContactManager';
 import Dashboard from '@/features/admin/components/Dashboard';
+import UserManager from '@/features/admin/components/UserManager';
 
 import './AdminPage.css';
 
@@ -30,6 +31,7 @@ const AdminPage = () => {
   if (path.includes('culture')) return <CultureManager />;
   if (path.includes('images')) return <ImageManager />;
   if (path.includes('contacts')) return <ContactManager />;
+  if (path.includes('users')) return <UserManager />;
   
   return <Dashboard />;
 };

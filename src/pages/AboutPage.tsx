@@ -16,7 +16,7 @@ const AboutPage = () => {
   const { teamImages } = useTeamImages();
   const [selectedImg, setSelectedImg] = useState<string | null>(null);
   const scrambledName = useTextScramble({ text: company.name, delay: 500, speed: 40, cycles: 6 });
-  
+
   const visionImageUrl = getText('about_vision_image', visionImg);
   const missionImageUrl = getText('about_mission_image', missionImg);
 
@@ -27,17 +27,17 @@ const AboutPage = () => {
   });
 
   /* Dynamic core values from CMS */
-  const coreValues = [1,2,3,4,5,6].map((n, i) => ({
+  const coreValues = [1, 2, 3, 4, 5, 6].map((n, i) => ({
     icon: VALUE_ICONS[i],
-    title: getText(`about_value_${n}_title`, ['Customer Focus','Transparency','Innovation','Team Work','Agility','Fun Place To Work'][i]),
-    desc: getText(`about_value_${n}_desc`, ['Value customers with quality of work.','Be the partner of choice by being transparent & ethical.','Constantly explore new technologies and methodologies.','Value employees for their quality of work.','Adapt quickly to changing business needs.','Creating an enjoyable and engaging work environment.'][i]),
+    title: getText(`about_value_${n}_title`, ['Customer Focus', 'Transparency', 'Innovation', 'Team Work', 'Agility', 'Fun Place To Work'][i]),
+    desc: getText(`about_value_${n}_desc`, ['Value customers with quality of work.', 'Be the partner of choice by being transparent & ethical.', 'Constantly explore new technologies and methodologies.', 'Value employees for their quality of work.', 'Adapt quickly to changing business needs.', 'Creating an enjoyable and engaging work environment.'][i]),
   }));
 
   /* Dynamic approach steps from CMS */
-  const approach = [1,2,3].map((n, i) => ({
+  const approach = [1, 2, 3].map((n, i) => ({
     step: `0${n}`,
-    title: getText(`about_approach_${n}_title`, ['Listen','Understand','Deliver'][i]),
-    desc: getText(`about_approach_${n}_desc`, ['Listen to your concerns, needs, challenges, and goals.','Understand your business, market sector, and competitors.','Combine with technical expertise to deliver optimal, cost-effective solutions.'][i]),
+    title: getText(`about_approach_${n}_title`, ['Listen', 'Understand', 'Deliver'][i]),
+    desc: getText(`about_approach_${n}_desc`, ['Listen to your concerns, needs, challenges, and goals.', 'Understand your business, market sector, and competitors.', 'Combine with technical expertise to deliver optimal, cost-effective solutions.'][i]),
   }));
 
   return (
@@ -60,8 +60,8 @@ const AboutPage = () => {
         <div className="container">
           {/* Vision Block */}
           <div className="about-row">
-            <motion.div 
-              className="about-image-wrapper" 
+            <motion.div
+              className="about-image-wrapper"
               initial={{ opacity: 0, x: -60 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: '-100px' }}
@@ -74,8 +74,8 @@ const AboutPage = () => {
                 <span>{getText('about_vision_badge', 'Future-Focused')}</span>
               </div>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               className="about-text-content"
               initial={{ opacity: 0, x: 60 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -85,7 +85,7 @@ const AboutPage = () => {
               <span className="about-section-subtitle">{getText('about_vision_subtitle', 'Aspiration & Direction')}</span>
               <h2 className="about-section-heading">Our <span>Vision</span></h2>
               <p className="about-section-text">{company.vision}</p>
-              
+
               <div className="about-pillar-list">
                 <div className="about-pillar-item">
                   <span className="pillar-dot pillar-dot--blue" />
@@ -107,7 +107,7 @@ const AboutPage = () => {
 
           {/* Mission Block (Alternating Layout) */}
           <div className="about-row about-row--alt">
-            <motion.div 
+            <motion.div
               className="about-text-content"
               initial={{ opacity: 0, x: -60 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -117,7 +117,7 @@ const AboutPage = () => {
               <span className="about-section-subtitle">{getText('about_mission_subtitle', 'Execution & Deliverables')}</span>
               <h2 className="about-section-heading">Our <span>Mission</span></h2>
               <p className="about-section-text">{company.mission}</p>
-              
+
               <div className="about-pillar-list">
                 <div className="about-pillar-item">
                   <span className="pillar-dot pillar-dot--orange" />
@@ -136,7 +136,7 @@ const AboutPage = () => {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="about-image-wrapper"
               initial={{ opacity: 0, x: 60 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -215,16 +215,16 @@ const AboutPage = () => {
               </p>
             </div>
 
-            <motion.div 
-              className="team-gallery" 
-              variants={staggerContainer} 
-              initial="initial" 
-              whileInView="animate" 
+            <motion.div
+              className="team-gallery"
+              variants={staggerContainer}
+              initial="initial"
+              whileInView="animate"
               viewport={{ once: true }}
             >
               {teamImages.map((img, index) => (
-                <motion.div 
-                  key={img.id} 
+                <motion.div
+                  key={img.id}
                   className={`team-gallery__item team-gallery__item--${(index % 5) + 1}`}
                   variants={staggerItem}
                   whileHover={{ scale: 1.05, rotate: index % 2 === 0 ? 2 : -2 }}
@@ -243,14 +243,14 @@ const AboutPage = () => {
       {/* ═══ Lightbox ═══ */}
       <AnimatePresence>
         {selectedImg && (
-          <motion.div 
+          <motion.div
             className="lightbox"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSelectedImg(null)}
           >
-            <motion.button 
+            <motion.button
               className="lightbox__close"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -258,9 +258,9 @@ const AboutPage = () => {
             >
               <X size={32} />
             </motion.button>
-            <motion.img 
-              src={selectedImg} 
-              alt="Team Moment" 
+            <motion.img
+              src={selectedImg}
+              alt="Team Moment"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}

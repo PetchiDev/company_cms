@@ -1181,3 +1181,72 @@
     grid-template-columns: 1fr;
   }
 }
+/* ─── Responsive ─── */
+@media (max-width: 1024px) {
+  .hero__text { max-width: 100%; }
+  .services-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: auto;
+    padding: 8rem 0 4rem;
+    text-align: center;
+  }
+  
+  .hero__content {
+    padding-top: 4rem;
+  }
+
+  .hero__text {
+    margin: 0 auto;
+  }
+
+  .hero__title {
+    font-size: 2.5rem;
+    align-items: center;
+  }
+
+  .hero__subtitle {
+    margin: 0 auto 2rem;
+    font-size: 1rem;
+  }
+
+  .hero__actions {
+    justify-content: center;
+  }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .case-studies-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .certifications-grid {
+    gap: 1.5rem;
+  }
+  
+  .certification-badge {
+    width: 120px;
+    height: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero__title {
+    font-size: 2.1rem;
+  }
+  
+  .hero__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .hero__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

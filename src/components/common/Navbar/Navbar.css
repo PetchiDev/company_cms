@@ -235,7 +235,8 @@
   position: fixed;
   top: 0;
   right: 0;
-  width: 320px;
+  width: 100%;
+  max-width: 360px;
   height: 100vh;
   background: linear-gradient(135deg, #1a1a2e, #16213e);
   padding: 5rem 1.5rem 2rem;
@@ -244,10 +245,32 @@
   z-index: var(--z-fixed);
 }
 
+.navbar__mobile-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.navbar__mobile-close:hover {
+  background: var(--primary-orange);
+  transform: rotate(90deg);
+}
+
 .navbar__mobile-nav {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 
 .navbar__mobile-link {

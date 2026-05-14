@@ -15,6 +15,7 @@ import {
   FileText,
   Settings,
   Heart,
+  UserPlus,
 } from 'lucide-react';
 import { useEffect } from 'react';
 import './AdminLayout.css';
@@ -48,6 +49,7 @@ const AdminLayout = () => {
     { path: ROUTES.ADMIN_CULTURE, icon: Heart, label: 'Careers Culture' },
     { path: ROUTES.ADMIN_IMAGES, icon: Images, label: 'Image Manager' },
     { path: ROUTES.ADMIN_CONTACTS, icon: MessageSquare, label: 'Contact Submissions' },
+    { path: ROUTES.ADMIN_USERS, icon: UserPlus, label: 'Add Admin' },
   ];
 
   return (

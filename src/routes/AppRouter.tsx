@@ -76,6 +76,7 @@ const router = createBrowserRouter([
       { path: 'blog', element: <Suspense fallback={<Loader />}><AdminPage /></Suspense> },
       { path: 'services', element: <Suspense fallback={<Loader />}><AdminPage /></Suspense> },
       { path: 'culture', element: <Suspense fallback={<Loader />}><AdminPage /></Suspense> },
+      { path: 'users', element: <Suspense fallback={<Loader />}><AdminPage /></Suspense> },
     ],
   },
 ]);

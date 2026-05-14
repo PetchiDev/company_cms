@@ -114,7 +114,13 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden !important;
+  width: 100vw;
+}
+
+#root {
   overflow-x: hidden;
+  width: 100%;
 }
 
 img {
@@ -341,17 +347,33 @@ select {
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   .container {
-    padding: 0 var(--space-md);
+    padding: 0 var(--space-lg); /* Slightly more padding for mobile */
   }
 
   .section {
-    padding: var(--space-3xl) 0;
+    padding: var(--space-2xl) 0;
+  }
+  
+  .section-heading {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .section-heading__title {
+    font-size: 2.25rem; /* Better default for mobile headers */
   }
 }
 
 @media (max-width: 480px) {
   html {
     font-size: 14px;
+  }
+  
+  .container {
+    padding: 0 var(--space-md);
+  }
+  
+  .section-heading__title {
+    font-size: 1.875rem;
   }
 }
 

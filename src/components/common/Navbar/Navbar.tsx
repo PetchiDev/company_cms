@@ -211,6 +211,15 @@ const Navbar = () => {
             animate="open"
             exit="closed"
           >
+            {/* Mobile Close Button */}
+            <button 
+              className="navbar__mobile-close" 
+              onClick={() => setIsMobileOpen(false)}
+              aria-label="Close menu"
+            >
+              <X size={28} />
+            </button>
+
             <nav className="navbar__mobile-nav" aria-label="Mobile navigation">
               {navLinks.map((link) => (
                 <div key={link.path} className="navbar__mobile-item">

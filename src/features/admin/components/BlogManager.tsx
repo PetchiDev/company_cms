@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import ImageInputWithUpload from './ImageInputWithUpload';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/queryKeys';
@@ -114,6 +116,27 @@ const BlogManager = () => {
     }
   };
 
+  const quillModules = useMemo(() => ({
+    toolbar: [
+      [{ header: [1, 2, 3, 4, 5, 6, false] }],
+      [{ size: ['small', false, 'large', 'huge'] }],
+      [{ color: [] }, { background: [] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ align: [] }],
+      [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+      ['blockquote', 'code-block', 'link', 'image', 'video'],
+      ['clean'],
+    ],
+  }), []);
+
+  const quillFormats = [
+    'header', 'size',
+    'color', 'background',
+    'bold', 'italic', 'underline', 'strike',
+    'align', 'list', 'bullet', 'indent',
+    'blockquote', 'code-block', 'link', 'image', 'video',
+  ];
+
   const handleToggleActive = async (record: BlogArticleRecord) => {
     await upsertMutation.mutateAsync({
       ...record,
@@ -180,24 +203,24 @@ const BlogManager = () => {
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <div className="admin-toggle-group">
-            <button 
-              className={`toggle-btn ${viewMode === 'table' ? 'active' : ''}`} 
+            <button
+              className={`toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
               onClick={() => setViewMode('table')}
               title="Table View"
             >
               <TableIcon size={18} />
             </button>
-            <button 
-              className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} 
+            <button
+              className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
               onClick={() => setViewMode('grid')}
               title="Grid View"
             >
               <LayoutGrid size={18} />
             </button>
           </div>
-          <button onClick={openCreateModal} className="creative-btn creative-btn--sliding parallelogram" style={{ 
-            background: 'var(--primary-orange)', 
-            color: 'white', 
+          <button onClick={openCreateModal} className="creative-btn creative-btn--sliding parallelogram" style={{
+            background: 'var(--primary-orange)',
+            color: 'white',
             padding: '0.8rem 2rem',
             display: 'flex',
             alignItems: 'center',
@@ -240,7 +263,7 @@ const BlogManager = () => {
                 <h4 className="modern-card__title">{blog.title}</h4>
                 <p className="modern-card__excerpt">{blog.excerpt}</p>
                 <div className="modern-card__footer">
-                   <div className="table-actions" style={{ width: '100%' }}>
+                  <div className="table-actions" style={{ width: '100%' }}>
                     <button onClick={() => openEditModal(blog)} className="admin-icon-btn" style={{ flex: 1 }}><Edit2 size={14} /> Edit</button>
                     <button onClick={() => handleDelete(blog.id)} className="admin-icon-btn admin-icon-btn--danger"><Trash2 size={14} /></button>
                   </div>
@@ -295,16 +318,26 @@ const BlogManager = () => {
                   <button type="button" className={`editor-tab ${editorMode === 'write' ? 'active' : ''}`} onClick={() => setEditorMode('write')}>Write</button>
                   <button type="button" className={`editor-tab ${editorMode === 'preview' ? 'active' : ''}`} onClick={() => setEditorMode('preview')}>Preview</button>
                 </div>
-                
+
                 {editorMode === 'write' ? (
-                  <textarea 
-                    className="admin-input editor-textarea" 
-                    placeholder="Enter HTML content or leave empty for external link..." 
-                    value={content} 
-                    onChange={(e) => setContent(e.target.value)}
-                  />
+                  <div className="quill-editor-wrapper">
+                    <ReactQuill
+                      theme="snow"
+                      value={content}
+                      onChange={setContent}
+                      modules={quillModules}
+                      formats={quillFormats}
+                      placeholder="Paste your content or start writing your masterpiece..."
+                    />
+                  </div>
                 ) : (
-                  <div className="editor-preview" dangerouslySetInnerHTML={{ __html: content || '<em>No content to preview</em>' }} />
+                  <div className="ql-container ql-snow" style={{ border: 'none' }}>
+                    <div 
+                      className="ql-editor blog-content-renderer" 
+                      dangerouslySetInnerHTML={{ __html: (content || '<em>No content to preview</em>').replace(/&nbsp;/g, ' ') }} 
+                      style={{ padding: '1rem 0' }}
+                    />
+                  </div>
                 )}
               </div>
 
@@ -321,9 +354,9 @@ const BlogManager = () => {
                   <span className="toggle-slider"></span>
                   <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Active</span>
                 </label>
-                <button type="submit" className="creative-btn creative-btn--sliding" style={{ 
-                  background: 'var(--primary-orange)', 
-                  color: 'white', 
+                <button type="submit" className="creative-btn creative-btn--sliding" style={{
+                  background: 'var(--primary-orange)',
+                  color: 'white',
                   padding: '1rem 4rem',
                   borderRadius: 'var(--radius-md)',
                   fontWeight: 700

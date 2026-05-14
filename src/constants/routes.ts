@@ -21,5 +21,6 @@ export const ROUTES = {
   ADMIN_BLOG: '/admin/blog',
   ADMIN_SERVICES: '/admin/services',
   ADMIN_CULTURE: '/admin/culture',
+  ADMIN_USERS: '/admin/users',
   NOT_FOUND: '*',
 } as const;

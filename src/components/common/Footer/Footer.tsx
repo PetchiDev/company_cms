@@ -139,7 +139,6 @@ const Footer = () => {
         </div>
       </div>
 
-      <button className="footer__scroll-top" onClick={scrollToTop} aria-label="Scroll to top"><ArrowUp size={20} /></button>
     </footer>
   );
 };

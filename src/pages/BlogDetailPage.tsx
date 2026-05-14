@@ -55,69 +55,64 @@ const BlogDetailPage = () => {
   }
 
   return (
-    <div className="blog-detail-page" style={{ paddingBottom: '4rem' }}>
-      <section className="page-hero" style={{ padding: '8rem 0 4rem' }}>
-        <div className="page-hero__bg" />
-        <div className="floating-shape floating-shape--1" />
-        <div className="floating-shape floating-shape--3" />
-        <div className="container page-hero__content" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-start' }}>
-          <Link to={ROUTES.BLOG} className="page-hero__back" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-            <ArrowLeft size={16} /> All Articles
+    <div className="blog-detail-page">
+      <section className="section" style={{ paddingTop: '8rem', paddingBottom: '4rem' }}>
+        <div className="container" style={{ maxWidth: '1200px' }}>
+          {/* Back Button */}
+          <Link to={ROUTES.BLOG} className="btn btn--outline" style={{ marginBottom: '2rem', border: 'none', padding: 0, color: 'var(--muted-text)' }}>
+            <ArrowLeft size={16} /> Back to Insights
           </Link>
-          <motion.h1
-            className="page-hero__title"
-            style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', margin: 0, textAlign: 'left', lineHeight: 1.1 }}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
+
+          {/* Title Header */}
+          <header style={{ marginBottom: '3rem' }}>
+            <motion.h1
+              style={{ 
+                fontSize: 'clamp(2.2rem, 5vw, 3.8rem)', 
+                color: 'var(--dark-navy)', 
+                fontWeight: 800,
+                lineHeight: 1.1,
+                marginBottom: '1.5rem'
+              }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              {article.title}
+            </motion.h1>
+
+            <div style={{ display: 'flex', gap: '2rem', color: 'var(--muted-text)', fontSize: '0.9rem' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Calendar size={14} /> {new Date(article.date).toLocaleDateString()}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Clock size={14} /> 6 min read</span>
+            </div>
+          </header>
+
+          {/* Featured Image */}
+          <motion.div 
+            style={{ 
+              width: '100%', 
+              borderRadius: '1.5rem', 
+              overflow: 'hidden', 
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+              marginBottom: '4rem'
+            }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
           >
-            {article.title}
-          </motion.h1>
-          
-          <motion.div
-            style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', marginTop: '1rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)' }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <Calendar size={14} />
-              <span>{new Date(article.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <User size={14} />
-              <span>By Administrator</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <Clock size={14} />
-              <span>5 min read</span>
-            </div>
+            <img src={article.image} alt={article.title} style={{ width: '100%', height: 'auto', display: 'block' }} />
           </motion.div>
-        </div>
-      </section>
 
-      <section className="section">
-        <div className="container" style={{ maxWidth: '800px' }}>
-          <div style={{ width: '100%', maxHeight: '450px', overflow: 'hidden', borderRadius: 'var(--radius-xl)', marginBottom: '3rem', boxShadow: 'var(--shadow-md)' }}>
-            <img src={article.image} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-
-          <div
-            className="blog-content-renderer"
-            dangerouslySetInnerHTML={{ __html: article.content || '' }}
-            style={{
-              fontSize: '1.1rem',
-              lineHeight: 1.8,
-              color: 'var(--dark-text)',
-            }}
+          {/* Content Body */}
+          <article 
+            className="blog-content-renderer ql-editor"
+            dangerouslySetInnerHTML={{ __html: (article.content || '').replace(/&nbsp;/g, ' ') }}
           />
 
-          <div style={{ marginTop: '4rem', paddingTop: '2rem', borderTop: '1px solid rgba(0,0,0,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Link to={ROUTES.BLOG} className="magnetic-btn magnetic-btn--outline magnetic-btn--md">
-              <span className="magnetic-btn__text"><ArrowLeft size={16} /> Back to Blog</span>
-              <span className="magnetic-btn__glow" />
+          {/* Footer Back */}
+          <footer style={{ marginTop: '5rem', paddingTop: '3rem', borderTop: '1px solid #eee' }}>
+            <Link to={ROUTES.BLOG} className="btn btn--primary" style={{ borderRadius: '50px', padding: '1rem 2.5rem' }}>
+              <ArrowLeft size={16} style={{ marginRight: '0.5rem' }} /> Back to Blog
             </Link>
-          </div>
+          </footer>
         </div>
       </section>
     </div>
