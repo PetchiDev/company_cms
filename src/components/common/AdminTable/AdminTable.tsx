@@ -40,6 +40,10 @@ export function AdminTable<T extends { id: string | number }>({
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [expandedRows, setExpandedRows] = useState<Record<string | number, boolean>>({});
 
+  const hasFilterableColumns = useMemo(() => {
+    return columns.some(col => col.filterable && typeof col.accessor === 'string');
+  }, [columns]);
+
   const toggleRow = (id: string | number) => {
     setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));
   };
@@ -125,7 +129,16 @@ export function AdminTable<T extends { id: string | number }>({
         <table className="admin-table">
           <thead>
             <tr>
-              {expandable && <th style={{ width: '50px' }} />}
+              {expandable && (
+                <th style={{ width: '50px' }}>
+                  <div className="th-content">
+                    <div className="th-label">&nbsp;</div>
+                    {hasFilterableColumns && (
+                      <input type="text" className="column-filter" style={{ visibility: 'hidden', height: '0', padding: '0', border: 'none' }} disabled />
+                    )}
+                  </div>
+                </th>
+              )}
               {columns.map((col, idx) => (
                 <th key={idx} style={{ width: col.width }}>
                   <div className="th-content">
@@ -144,7 +157,7 @@ export function AdminTable<T extends { id: string | number }>({
                         </span>
                       )}
                     </div>
-                    {col.filterable && typeof col.accessor === 'string' && (
+                    {col.filterable && typeof col.accessor === 'string' ? (
                       <input
                         type="text"
                         placeholder={`Filter ${col.header}...`}
@@ -152,11 +165,34 @@ export function AdminTable<T extends { id: string | number }>({
                         value={filters[col.accessor as string] || ''}
                         onChange={(e) => handleFilterChange(col.accessor as string, e.target.value)}
                       />
+                    ) : (
+                      hasFilterableColumns && (
+                        <input
+                          type="text"
+                          className="column-filter"
+                          style={{ visibility: 'hidden', pointerEvents: 'none' }}
+                          disabled
+                        />
+                      )
                     )}
                   </div>
                 </th>
               ))}
-              {actions && <th className="text-right">Actions</th>}
+              {actions && (
+                <th className="text-right">
+                  <div className="th-content">
+                    <div className="th-label" style={{ justifyContent: 'flex-end' }}>Actions</div>
+                    {hasFilterableColumns && (
+                      <input
+                        type="text"
+                        className="column-filter"
+                        style={{ visibility: 'hidden', pointerEvents: 'none' }}
+                        disabled
+                      />
+                    )}
+                  </div>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>

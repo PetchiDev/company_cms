@@ -17,9 +17,6 @@ const UserManager = () => {
     setSuccess(false);
 
     try {
-      // 1. Create a temporary Supabase client that DOES NOT persist the session.
-      // This prevents the current Admin from being logged out when creating a new user.
-      const tempSupabase = supabase; // Fallback, but we need createClient
       // Actually, let's dynamically import createClient to make a clean instance
       const { createClient } = await import('@supabase/supabase-js');
       const authClient = createClient(
@@ -49,11 +46,21 @@ const UserManager = () => {
         // RLS should allow this insert.
         const { error: adminInsertError } = await supabase
           .from('admins')
-          .insert([{ id: data.user.id, email: data.user.email }]);
+          .insert([{ id: data.user.id }]);
           
         if (adminInsertError) {
-          console.error('Failed to insert into admins table:', adminInsertError);
-          throw new Error('User created but failed to assign admin role due to security rules.');
+          // If insert fails (could be due to RLS or duplicate key), check if the user is already in the admins table
+          // (which would happen if a Postgres trigger handled it automatically)
+          const { data: adminExists } = await supabase
+            .from('admins')
+            .select('id')
+            .eq('id', data.user.id)
+            .maybeSingle();
+
+          if (!adminExists) {
+            console.error('Failed to insert into admins table:', adminInsertError);
+            throw new Error(`User created but failed to assign admin role: ${adminInsertError.message} (${adminInsertError.code})`);
+          }
         }
 
         setSuccess(true);

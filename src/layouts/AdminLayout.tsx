@@ -16,13 +16,16 @@ import {
   Settings,
   Heart,
   UserPlus,
+  Menu,
+  X,
 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import './AdminLayout.css';
 
 const AdminLayout = () => {
   const { logout, user } = useAuth();
   const location = useLocation();
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     // Force immediate scroll to top on tab change in admin panel
@@ -35,6 +38,9 @@ const AdminLayout = () => {
     requestAnimationFrame(() => {
       htmlEl.style.scrollBehavior = originalScrollBehavior;
     });
+
+    // Close mobile sidebar on route change
+    setMobileSidebarOpen(false);
   }, [location.pathname]);
 
   const navItems = [
@@ -54,9 +60,28 @@ const AdminLayout = () => {
 
   return (
     <div className="admin-layout">
-      <aside className="admin-sidebar">
+      {/* Mobile Top Header */}
+      <div className="admin-mobile-header">
+        <button onClick={() => setMobileSidebarOpen(true)} className="mobile-menu-btn" aria-label="Open Menu">
+          <Menu size={24} />
+        </button>
+        <h2 className="admin-mobile-title">Admin Panel</h2>
+        <div style={{ width: 24 }} /> {/* Visual spacer to balance the menu button */}
+      </div>
+
+      {/* Sidebar Overlay Backdrop */}
+      {mobileSidebarOpen && (
+        <div className="admin-sidebar-overlay" onClick={() => setMobileSidebarOpen(false)} />
+      )}
+
+      <aside className={`admin-sidebar ${mobileSidebarOpen ? 'admin-sidebar--open' : ''}`}>
         <div className="admin-sidebar__header">
-          <h2 className="admin-sidebar__title">Admin Panel</h2>
+          <div className="sidebar-header-flex">
+            <h2 className="admin-sidebar__title">Admin Panel</h2>
+            <button onClick={() => setMobileSidebarOpen(false)} className="mobile-close-btn" aria-label="Close Menu">
+              <X size={20} />
+            </button>
+          </div>
           <p className="admin-sidebar__email">{user?.email}</p>
         </div>
 

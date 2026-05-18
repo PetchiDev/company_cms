@@ -178,7 +178,7 @@ const TestimonialManager = () => {
           <button onClick={openCreateModal} className="creative-btn creative-btn--sliding parallelogram" style={{ 
             background: 'var(--primary-orange)', 
             color: 'white', 
-            padding: '0.8rem 2rem',
+            padding: '0.8rem 2.8rem',
             display: 'flex',
             alignItems: 'center',
             gap: '0.75rem',

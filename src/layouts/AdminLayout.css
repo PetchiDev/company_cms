@@ -1,5 +1,6 @@
 .admin-layout {
-  display: flex;
+  display: grid;
+  grid-template-columns: 260px 1fr;
   min-height: 100vh;
   background: var(--bg-light);
 }
@@ -16,6 +17,7 @@
   bottom: 0;
   z-index: var(--z-sticky);
   overflow: hidden; /* Prevent sidebar itself from scrolling */
+  transition: left 0.3s ease;
 }
 
 .admin-sidebar__nav {
@@ -52,7 +54,6 @@
   color: rgba(255,255,255,0.5);
   margin-top: 0.25rem;
 }
-
 
 .admin-sidebar__link {
   display: flex;
@@ -92,8 +93,140 @@
 }
 
 .admin-content {
-  flex: 1;
-  margin-left: 260px;
+  grid-column: 2;
   padding: 2rem;
   min-height: 100vh;
+  min-width: 0; /* Let table and grid shrink */
+}
+
+/* Mobile Header (Hidden on Desktop) */
+.admin-mobile-header {
+  display: none;
+  background: var(--bg-navy);
+  color: white;
+  padding: 1rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 150;
+  box-shadow: var(--shadow-sm);
+}
+
+.mobile-menu-btn {
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-mobile-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--primary-orange);
+  margin: 0;
+}
+
+.mobile-close-btn {
+  display: none;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.2s;
+}
+
+.mobile-close-btn:hover {
+  color: white;
+}
+
+.admin-sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 190;
+}
+
+/* Tablet View (Collapse Sidebar to 80px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .admin-layout {
+    grid-template-columns: 80px 1fr;
+  }
+
+  .admin-sidebar {
+    width: 80px;
+  }
+
+  .admin-sidebar__title,
+  .admin-sidebar__email {
+    display: none;
+  }
+
+  .admin-sidebar__header {
+    padding: 1.5rem 0.5rem;
+    text-align: center;
+  }
+
+  .admin-sidebar__header::after {
+    content: 'KP';
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--primary-orange);
+    display: block;
+    margin: 0 auto;
+  }
+
+  .admin-sidebar__link {
+    font-size: 0 !important;
+    justify-content: center;
+    padding: 0.75rem;
+  }
+
+  .admin-sidebar__link svg {
+    margin: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  .admin-sidebar__footer {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+/* Mobile View (Hide Sidebar completely by default, show sliding) */
+@media (max-width: 768px) {
+  .admin-layout {
+    grid-template-columns: 1fr;
+    padding-top: 60px; /* Space for fixed mobile header */
+  }
+
+  .admin-sidebar {
+    left: -280px;
+    width: 280px;
+    z-index: 200;
+  }
+
+  .admin-sidebar--open {
+    left: 0;
+  }
+
+  .admin-content {
+    grid-column: 1;
+    padding: 1.5rem 1rem;
+  }
+
+  .admin-mobile-header {
+    display: flex;
+  }
+
+  .mobile-close-btn {
+    display: block;
+  }
+
+  .sidebar-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
 }

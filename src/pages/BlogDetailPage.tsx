@@ -6,12 +6,10 @@ import { ROUTES } from '@/constants/routes';
 import { blogService } from '@/api/services/cmsService';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { useSEO } from '@/hooks/useSEO';
-import { useState, useEffect } from 'react';
 import './BlogDetailPage.css';
 
 const BlogDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const [readingProgress, setReadingProgress] = useState(0);
 
   const { data: article, isLoading, isError } = useQuery({
     queryKey: [QUERY_KEYS.BLOG_ARTICLES, id],

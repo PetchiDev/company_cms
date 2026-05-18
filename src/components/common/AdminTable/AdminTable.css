@@ -215,11 +215,34 @@
   color: var(--admin-accent);
 }
 
-/* Responsive Table */
+/* Responsive Table with Custom Scrollbar */
+.admin-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Butter-smooth scrolling on iOS */
+}
+
+.admin-table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.admin-table-wrapper::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: var(--radius-full);
+}
+
+.admin-table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--admin-accent-soft);
+  border-radius: var(--radius-full);
+  transition: background 0.2s;
+}
+
+.admin-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-orange);
+}
+
 @media (max-width: 1024px) {
-  .admin-table th:not(:first-child):not(:last-child),
-  .admin-table td:not(:first-child):not(:last-child) {
-    display: none;
+  .admin-table {
+    min-width: 900px; /* Preserve structure and readable column spacing */
   }
 }
 

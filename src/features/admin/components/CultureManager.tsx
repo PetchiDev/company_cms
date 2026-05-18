@@ -3,7 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { cultureService } from '@/api/services/cmsService';
 import type { CultureHighlightRecord } from '@/types/cms.types';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X, Heart, Table as TableIcon, LayoutGrid } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X, Table as TableIcon, LayoutGrid } from 'lucide-react';
+import * as AllLucideIcons from 'lucide-react';
 import { AdminTable } from '@/components/common/AdminTable/AdminTable';
 import { useToast } from '@/components/ui/Toast/ToastProvider';
 import { useConfirm } from '@/components/ui/Modal/ConfirmProvider';
@@ -119,8 +120,18 @@ const CultureManager = () => {
     },
     {
       header: 'Icon',
-      accessor: 'icon' as keyof CultureHighlightRecord,
-      width: '100px'
+      accessor: (rec: CultureHighlightRecord) => {
+        const IconComponent = (AllLucideIcons as any)[rec.icon] || AllLucideIcons.HelpCircle;
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--primary-orange)' }}>
+            <div style={{ background: 'var(--admin-accent-soft)', padding: '6px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <IconComponent size={16} />
+            </div>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--dark-navy)' }}>{rec.icon}</span>
+          </div>
+        );
+      },
+      width: '140px'
     },
     {
       header: 'Order',
@@ -162,7 +173,7 @@ const CultureManager = () => {
           <button onClick={openCreateModal} className="creative-btn creative-btn--sliding parallelogram" style={{ 
             background: 'var(--primary-orange)', 
             color: 'white', 
-            padding: '0.8rem 2rem',
+            padding: '0.8rem 3.2rem',
             display: 'flex',
             alignItems: 'center',
             gap: '0.75rem',
@@ -198,7 +209,10 @@ const CultureManager = () => {
             <div key={item.id} className="modern-card" style={{ opacity: item.is_active ? 1 : 0.6, padding: '1.5rem' }}>
                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
                  <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: 'var(--admin-accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-orange)' }}>
-                   <Heart size={20} />
+                   {(() => {
+                     const DynamicCardIcon = (AllLucideIcons as any)[item.icon] || AllLucideIcons.Heart;
+                     return <DynamicCardIcon size={20} />;
+                   })()}
                  </div>
                  <span className="admin-tag">#{item.sort_order}</span>
                </div>
