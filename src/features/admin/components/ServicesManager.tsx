@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { servicesService } from '@/api/services/cmsService';
 import type { ServiceRecord, ServiceCategoryRecord } from '@/types/cms.types';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X, FolderKanban, Cpu } from 'lucide-react';
 import { AdminTable } from '@/components/common/AdminTable/AdminTable';
 import { useToast } from '@/components/ui/Toast/ToastProvider';
@@ -19,6 +20,9 @@ const ServicesManager = () => {
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<ServiceRecord | null>(null);
   const [editingCategory, setEditingCategory] = useState<ServiceCategoryRecord | null>(null);
+
+  /* Scroll Lock Logic */
+  useScrollLock(serviceModalOpen || categoryModalOpen);
 
   /* Service Form State */
   const [title, setTitle] = useState('');

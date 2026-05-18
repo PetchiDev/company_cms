@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, ArrowUp } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { useState } from 'react';
 import { useSiteContent, useServices, useSiteLogo } from '@/hooks/useCMS';
@@ -43,7 +43,6 @@ const Footer = () => {
     }
   };
 
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   return (
     <footer className="footer" id="site-footer">

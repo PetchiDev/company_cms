@@ -17,10 +17,21 @@ const UserManager = () => {
     setSuccess(false);
 
     try {
-      // Create user in Supabase Auth
-      // Note: By default, this might auto-login if not configured otherwise, 
-      // but in most admin dashboards we handle this with a specific flow.
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      // 1. Create a temporary Supabase client that DOES NOT persist the session.
+      // This prevents the current Admin from being logged out when creating a new user.
+      const tempSupabase = supabase; // Fallback, but we need createClient
+      // Actually, let's dynamically import createClient to make a clean instance
+      const { createClient } = await import('@supabase/supabase-js');
+      const authClient = createClient(
+        import.meta.env.VITE_SUPABASE_URL,
+        import.meta.env.VITE_SUPABASE_ANON_KEY,
+        {
+          auth: { persistSession: false, autoRefreshToken: false }
+        }
+      );
+
+      // 2. Create the new user in Supabase Auth using the temp client
+      const { data, error: signUpError } = await authClient.auth.signUp({
         email,
         password,
         options: {
@@ -33,6 +44,18 @@ const UserManager = () => {
       if (signUpError) throw signUpError;
 
       if (data.user) {
+        // 3. Now use the MAIN supabase client (which still has the current Admin's session)
+        // to insert the new user into the admins table. Since we are logged in as admin,
+        // RLS should allow this insert.
+        const { error: adminInsertError } = await supabase
+          .from('admins')
+          .insert([{ id: data.user.id, email: data.user.email }]);
+          
+        if (adminInsertError) {
+          console.error('Failed to insert into admins table:', adminInsertError);
+          throw new Error('User created but failed to assign admin role due to security rules.');
+        }
+
         setSuccess(true);
         setEmail('');
         setPassword('');

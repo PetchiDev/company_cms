@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import ImageInputWithUpload from './ImageInputWithUpload';
+import { useState, useEffect } from 'react';
+import AssetInputWithUpload from './AssetInputWithUpload';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { caseStudyService } from '@/api/services/cmsService';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import type { CaseStudyRecord } from '@/types/cms.types';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X, FileText, Table as TableIcon, LayoutGrid } from 'lucide-react';
 import { AdminTable } from '@/components/common/AdminTable/AdminTable';
@@ -16,6 +17,9 @@ const CaseStudyManager = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [editingRecord, setEditingRecord] = useState<CaseStudyRecord | null>(null);
+  
+  /* Scroll Lock Logic */
+  useScrollLock(modalOpen);
 
   /* Form Fields */
   const [title, setTitle] = useState('');
@@ -260,23 +264,30 @@ const CaseStudyManager = () => {
                   <input type="number" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="admin-input" />
                 </div>
               </div>
-
               <div className="form-group">
                 <label>Overview Description</label>
                 <textarea required rows={3} value={description} onChange={(e) => setDescription(e.target.value)} className="admin-input" style={{ resize: 'none' }} />
               </div>
 
-              <ImageInputWithUpload
+
+              <AssetInputWithUpload
                 label="Thumbnail Image"
                 value={thumbnail}
                 onChange={setThumbnail}
                 category="cases"
+                fileType="image"
+                accept="image/*"
               />
 
-              <div className="form-group">
-                <label>Briefing PDF Link (Optional)</label>
-                <input type="url" placeholder="https://..." value={pdfLink} onChange={(e) => setPdfLink(e.target.value)} className="admin-input" />
-              </div>
+              <AssetInputWithUpload
+                label="Briefing PDF (Link or Upload)"
+                value={pdfLink}
+                onChange={setPdfLink}
+                category="case-documents"
+                fileType="pdf"
+                accept="application/pdf"
+                placeholder="https://... or upload local file"
+              />
 
               <div className="flex-between">
                 <label className="toggle-switch">

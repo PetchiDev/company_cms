@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, Info } from 'lucide-react';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import './ConfirmModal.css';
 
 export type ConfirmType = 'danger' | 'warning' | 'info';
@@ -62,6 +63,9 @@ export const ConfirmProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const { isOpen, options } = modalState;
+
+  /* Scroll Lock Logic */
+  useScrollLock(isOpen);
 
   return (
     <ConfirmContext.Provider value={{ confirm }}>

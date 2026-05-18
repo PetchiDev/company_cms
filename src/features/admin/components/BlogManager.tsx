@@ -5,6 +5,7 @@ import ImageInputWithUpload from './ImageInputWithUpload';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { blogService } from '@/api/services/cmsService';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import type { BlogArticleRecord } from '@/types/cms.types';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Loader2, X, Table as TableIcon, LayoutGrid } from 'lucide-react';
 import { AdminTable } from '@/components/common/AdminTable/AdminTable';
@@ -19,6 +20,9 @@ const BlogManager = () => {
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [editingRecord, setEditingRecord] = useState<BlogArticleRecord | null>(null);
   const [editorMode, setEditorMode] = useState<'write' | 'preview'>('write');
+
+  /* Scroll Lock Logic */
+  useScrollLock(modalOpen);
 
   /* Form Fields */
   const [title, setTitle] = useState('');
@@ -119,11 +123,10 @@ const BlogManager = () => {
   const quillModules = useMemo(() => ({
     toolbar: [
       [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      [{ size: ['small', false, 'large', 'huge'] }],
       [{ color: [] }, { background: [] }],
       ['bold', 'italic', 'underline', 'strike'],
-      [{ align: [] }],
       [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+      [{ align: [] }],
       ['blockquote', 'code-block', 'link', 'image', 'video'],
       ['clean'],
     ],
